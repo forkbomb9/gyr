@@ -339,12 +339,6 @@ fn main() -> Result<(), failure::Error> {
         app.update();
     }
 
-    terminal.clear()?;
-    terminal.flush()?;
-    terminal.show_cursor()?;
-
-    println!("Cleared terminal");
-
     if run {
         if let Some(selected) = app.selected {
 
