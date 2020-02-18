@@ -7,8 +7,7 @@ use std::fs;
 use std::io;
 use std::path;
 use std::process;
-
-use fork::{Fork, daemon};
+use std::os::unix::process::CommandExt;
 
 use fuzzy_filter::matches;
 
@@ -350,11 +349,13 @@ fn main() -> Result<(), failure::Error> {
         if let Some(selected) = app.selected {
 
             let commands = &app.shown[selected].exec.split(' ').collect::<Vec<&str>>();
-            if let Ok(Fork::Child) = daemon(false, false) {
+
+            unsafe {
                 process::Command::new(&commands[0])
+                    .pre_exec(|| { libc::setsid(); Ok(())})
                     .args(&commands[1..])
                     .spawn()
-                    .expect("Failed to run child");
+                    .expect("Failed to run program");
             }
         }
     }

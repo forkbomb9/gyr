@@ -84,15 +84,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fork"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39ba2f2dd9e60b2388d8550cf87a914e54843d777b616b603fad7a80a8df097b"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "fuzzy-filter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -280,8 +271,8 @@ name = "wlauncher"
 version = "0.1.0"
 dependencies = [
  "failure",
- "fork",
  "fuzzy-filter",
+ "libc",
  "regex",
  "termion",
  "tui",
