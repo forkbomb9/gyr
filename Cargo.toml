@@ -1,0 +1,13 @@
+[package]
+name = "wlauncher"
+version = "0.1.0"
+authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
+edition = "2018"
+
+[dependencies]
+tui = "0.8"
+termion = "1.5"
+failure = "0.1"
+fuzzy-filter = "0.1"
+regex = "1"
+fork = "0.1"
