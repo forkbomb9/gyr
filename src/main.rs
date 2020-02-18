@@ -1,7 +1,7 @@
 #[allow(dead_code)]
 mod event;
 
-use std::convert::{self, TryInto};
+use std::convert;
 use std::fmt;
 use std::fs;
 use std::io;
