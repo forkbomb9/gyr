@@ -94,7 +94,7 @@ impl Application {
             let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
             let mut exec = queries.get("Exec").unwrap_or(&"Unknow").to_string();
 
-            if let Some(range) = re.find(&exec) {
+            if let Some(range) = re.find(&exec.clone()) {
                 exec.replace_range(range.start()..range.end(), "");
             }
             exec_trimmed = exec;
