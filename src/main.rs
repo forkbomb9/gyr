@@ -232,9 +232,6 @@ fn main() -> Result<(), failure::Error> {
     // App
     let mut app = App::new(apps);
 
-    // Do I have to run child?
-    let mut run = false;
-
     app.update();
 
     // let mut scroll: u16 = 0;
@@ -309,7 +306,7 @@ fn main() -> Result<(), failure::Error> {
         match events.next()? {
             Event::Input(input) => match input {
                 Key::Esc => {
-                    break;
+                    return Ok(());
                 }
                 Key::Char('\n') => {
                     // app.log.push(Text::raw(format!(
@@ -323,7 +320,6 @@ fn main() -> Result<(), failure::Error> {
                     //         scroll += 1;
                     //     }
                     // }
-                    run = true;
                     break;
                 }
                 Key::Char(c) => {
@@ -372,35 +368,33 @@ fn main() -> Result<(), failure::Error> {
         app.update();
     }
 
-    if run {
-        if let Some(selected) = app.selected {
-            let app_to_run = &app.shown[selected];
+    if let Some(selected) = app.selected {
+        let app_to_run = &app.shown[selected];
 
-            let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
+        let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
 
-            if !app_to_run.terminal_exec {
-                unsafe {
-                    process::Command::new(&commands[0])
-                        .pre_exec(|| {
-                            libc::setsid();
-                            Ok(())
-                        })
-                        .args(&commands[1..])
-                        .spawn()
-                        .expect("Failed to run program");
-                }
-            } else {
-                unsafe {
-                    process::Command::new("alacritty")
-                        .pre_exec(|| {
-                            libc::setsid();
-                            Ok(())
-                        })
-                        .arg("-e")
-                        .args(&commands)
-                        .spawn()
-                        .expect("Failed to run program");
-                }
+        if !app_to_run.terminal_exec {
+            unsafe {
+                process::Command::new(&commands[0])
+                    .pre_exec(|| {
+                        libc::setsid();
+                        Ok(())
+                    })
+                    .args(&commands[1..])
+                    .spawn()
+                    .expect("Failed to run program");
+            }
+        } else {
+            unsafe {
+                process::Command::new("alacritty")
+                    .pre_exec(|| {
+                        libc::setsid();
+                        Ok(())
+                    })
+                    .arg("-e")
+                    .args(&commands)
+                    .spawn()
+                    .expect("Failed to run program");
             }
         }
     }
