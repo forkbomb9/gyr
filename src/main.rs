@@ -59,6 +59,7 @@ struct Application {
     name: String,
     exec: String,
     description: String,
+    terminal_exec: bool,
 }
 
 impl fmt::Display for Application {
@@ -111,10 +112,17 @@ impl Application {
             exec_trimmed = exec;
         }
 
+        let terminal_exec = if queries.get("Terminal").unwrap_or(&"false") == &"true" {
+            true
+        } else {
+            false
+        };
+
         Ok(Application {
             name: queries.get("Name").unwrap_or(&"Unknow").to_string(),
             exec: exec_trimmed,
             description: queries.get("Comment").unwrap_or(&"Unknow").to_string(),
+            terminal_exec: terminal_exec,
         })
     }
 }
@@ -362,15 +370,27 @@ fn main() -> Result<(), failure::Error> {
 
     if run {
         if let Some(selected) = app.selected {
+            let app_to_run = &app.shown[selected];
 
-            let commands = &app.shown[selected].exec.split(' ').collect::<Vec<&str>>();
+            let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
 
-            unsafe {
-                process::Command::new(&commands[0])
-                    .pre_exec(|| { libc::setsid(); Ok(())})
-                    .args(&commands[1..])
-                    .spawn()
-                    .expect("Failed to run program");
+            if !app_to_run.terminal_exec {
+                unsafe {
+                    process::Command::new(&commands[0])
+                        .pre_exec(|| {libc::setsid(); Ok(()) })
+                        .args(&commands[1..])
+                        .spawn()
+                        .expect("Failed to run program");
+                }
+            } else {
+                unsafe {
+                    process::Command::new("alacritty")
+                        .pre_exec(|| {libc::setsid(); Ok(()) })
+                        .arg("-e")
+                        .args(&commands)
+                        .spawn()
+                        .expect("Failed to run program");
+                }
             }
         }
     }
