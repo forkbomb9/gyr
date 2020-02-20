@@ -243,7 +243,7 @@ fn main() -> Result<(), failure::Error> {
                 .items(&app.shown)
                 .select(app.selected)
                 .style(style)
-                .highlight_style(style.fg(Color::LightYellow).modifier(Modifier::BOLD))
+                .highlight_style(style.fg(Color::LightBlue).modifier(Modifier::BOLD))
                 .highlight_symbol(">")
                 .render(&mut f, bottom_block[0]);
 
