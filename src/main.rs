@@ -74,7 +74,7 @@ impl convert::AsRef<str> for Application {
 }
 
 impl Application {
-    pub fn parse<T: Into<String>>(contents: T) -> Result<Application, io::Error> {
+    pub fn parse<T: Into<String>>(contents: T) -> Result<Application, failure::Error> {
         let contents = contents.into();
         let mut queries = std::collections::HashMap::new();
         let keys: Vec<&str> = contents.split('\n').collect();
@@ -93,6 +93,12 @@ impl Application {
             }
         }
         // dbg!(&queries);
+
+        if let Some(key) = queries.get("NoDisplay") {
+            if key.to_lowercase() == "true" {
+                failure::bail!("App is hidden");
+            }
+        }
 
         let exec_trimmed;
         {
