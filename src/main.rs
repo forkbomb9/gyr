@@ -5,9 +5,9 @@ use std::convert;
 use std::fmt;
 use std::fs;
 use std::io;
+use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
-use std::os::unix::process::CommandExt;
 
 use fuzzy_filter::matches;
 
@@ -30,7 +30,6 @@ fn read_applications(dirs: Vec<impl Into<path::PathBuf>>) -> Result<Vec<Applicat
     let mut apps = Vec::new();
 
     for dir in dirs {
-
         let files = fs::read_dir(dir.into())?;
 
         for file in files {
@@ -45,7 +44,6 @@ fn read_applications(dirs: Vec<impl Into<path::PathBuf>>) -> Result<Vec<Applicat
                 }
             }
         }
-
     }
 
     apps.sort();
@@ -159,8 +157,10 @@ impl<'a> App<'a> {
                     Style::default().fg(Color::LightBlue),
                 ),
                 Text::raw(format!("{}\n", &self.shown[selected].description)),
-                Text::styled(format!("\n{}", &self.shown[selected].exec),
-                    Style::default().fg(Color::DarkGray))
+                Text::styled(
+                    format!("\n{}", &self.shown[selected].exec),
+                    Style::default().fg(Color::DarkGray),
+                ),
             ];
         } else {
             self.text.clear();
@@ -182,7 +182,7 @@ impl<'a> App<'a> {
             }
         }
 
-        if self.shown.is_empty()  {
+        if self.shown.is_empty() {
             self.selected = None;
             self.log.push(Text::raw("NO ITEMS!"));
         }
@@ -205,7 +205,11 @@ fn main() -> Result<(), failure::Error> {
     // let dirs = vec!["/usr/share/applications", "/usr/local/share/applications", "~/.local/share/applications"];
     let mut dirs: Vec<path::PathBuf> = vec![];
     let local_share_applications = env!("HOME").to_string() + "/.local/share/applications";
-    for dir in &["/usr/share/applications", "/usr/local/share/applications", &local_share_applications] {
+    for dir in &[
+        "/usr/share/applications",
+        "/usr/local/share/applications",
+        &local_share_applications,
+    ] {
         let path = path::PathBuf::from(dir);
         if path.exists() {
             dirs.push(path);
@@ -289,7 +293,7 @@ fn main() -> Result<(), failure::Error> {
                 .alignment(Alignment::Left)
                 .wrap(true)
                 .render(&mut f, chunks[0]);
-                // .render(&mut f, top_block[0]);
+            // .render(&mut f, top_block[0]);
 
             // Paragraph::new(app.log.iter())
             //     .block(block.title("Log"))
@@ -377,7 +381,10 @@ fn main() -> Result<(), failure::Error> {
             if !app_to_run.terminal_exec {
                 unsafe {
                     process::Command::new(&commands[0])
-                        .pre_exec(|| {libc::setsid(); Ok(()) })
+                        .pre_exec(|| {
+                            libc::setsid();
+                            Ok(())
+                        })
                         .args(&commands[1..])
                         .spawn()
                         .expect("Failed to run program");
@@ -385,7 +392,10 @@ fn main() -> Result<(), failure::Error> {
             } else {
                 unsafe {
                     process::Command::new("alacritty")
-                        .pre_exec(|| {libc::setsid(); Ok(()) })
+                        .pre_exec(|| {
+                            libc::setsid();
+                            Ok(())
+                        })
                         .arg("-e")
                         .args(&commands)
                         .spawn()
