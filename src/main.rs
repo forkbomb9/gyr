@@ -26,21 +26,26 @@ use tui::Terminal;
 
 use event::{Event, Events};
 
-fn read_applications(dir: impl Into<path::PathBuf>) -> Result<Vec<Application>, io::Error> {
+fn read_applications(dirs: Vec<impl Into<path::PathBuf>>) -> Result<Vec<Application>, io::Error> {
     let mut apps = Vec::new();
 
-    let files = fs::read_dir(dir.into())?;
-    for file in files {
-        if let Ok(file) = file {
-            // dbg!(&file);
-            let contents = fs::read_to_string(file.path())?;
-            if contents.starts_with("[Desktop Entry]") {
-                let contents = contents.trim_start_matches("[Desktop Entry]\n");
-                if let Ok(app) = Application::parse(contents) {
-                    apps.push(app);
+    for dir in dirs {
+
+        let files = fs::read_dir(dir.into())?;
+
+        for file in files {
+            if let Ok(file) = file {
+                // dbg!(&file);
+                let contents = fs::read_to_string(file.path())?;
+                if contents.starts_with("[Desktop Entry]") {
+                    let contents = contents.trim_start_matches("[Desktop Entry]\n");
+                    if let Ok(app) = Application::parse(contents) {
+                        apps.push(app);
+                    }
                 }
             }
         }
+
     }
 
     apps.sort();
@@ -183,7 +188,16 @@ fn main() -> Result<(), failure::Error> {
 
     // return Ok(());
 
-    let apps = read_applications("/usr/share/applications/")?;
+    // let dirs = vec!["/usr/share/applications", "/usr/local/share/applications", "~/.local/share/applications"];
+    let mut dirs: Vec<path::PathBuf> = vec![];
+    for dir in &["/usr/share/applications", "/usr/local/share/applications", "~/.local/share/applications"] {
+        let path = path::PathBuf::from(dir);
+        if path.exists() {
+            dirs.push(path);
+        }
+    }
+
+    let apps = read_applications(dirs)?;
     // println!("Number of apps: {}", apps.len());
 
     // Terminal initialization
