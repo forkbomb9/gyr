@@ -1,5 +1,5 @@
 [package]
-name = "wlauncher"
+name = "flauncher"
 version = "0.1.0"
 authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
 edition = "2018"
