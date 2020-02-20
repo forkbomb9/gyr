@@ -81,7 +81,7 @@ impl Application {
         if keys.len() > 0 {
             for key in keys {
                 if key != "" {
-                    let splitted = key.split('=').collect::<Vec<&str>>();
+                    let splitted = key.splitn(2, '=').collect::<Vec<&str>>();
                     if splitted.len() == 2 {
                         values.entry(splitted[0]).or_insert(splitted[1]);
                     } else {
