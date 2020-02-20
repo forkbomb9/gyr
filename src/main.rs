@@ -190,7 +190,8 @@ fn main() -> Result<(), failure::Error> {
 
     // let dirs = vec!["/usr/share/applications", "/usr/local/share/applications", "~/.local/share/applications"];
     let mut dirs: Vec<path::PathBuf> = vec![];
-    for dir in &["/usr/share/applications", "/usr/local/share/applications", "~/.local/share/applications"] {
+    let local_share_applications = env!("HOME").to_string() + "/.local/share/applications";
+    for dir in &["/usr/share/applications", "/usr/local/share/applications", &local_share_applications] {
         let path = path::PathBuf::from(dir);
         if path.exists() {
             dirs.push(path);
