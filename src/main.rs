@@ -122,7 +122,10 @@ impl Application {
         Ok(Application {
             name: values.get("Name").unwrap_or(&"Unknow").to_string(),
             exec: exec_trimmed,
-            description: values.get("Comment").unwrap_or(&"No description").to_string(),
+            description: values
+                .get("Comment")
+                .unwrap_or(&"No description")
+                .to_string(),
             terminal_exec: terminal_exec,
         })
     }
