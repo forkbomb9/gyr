@@ -1,3 +1,4 @@
+mod cli;
 #[allow(dead_code)]
 mod event;
 
@@ -9,6 +10,8 @@ use std::io;
 use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
+
+use structopt::StructOpt;
 
 use fuzzy_filter::matches;
 
@@ -144,12 +147,12 @@ impl<'a> App<'a> {
         }
     }
 
-    fn update_info(&mut self) {
+    fn update_info(&mut self, color: Color) {
         if let Some(selected) = self.selected {
             self.text = vec![
                 Text::styled(
                     format!("{}\n\n", &self.shown[selected].name),
-                    Style::default().fg(Color::LightBlue),
+                    Style::default().fg(color),
                 ),
                 Text::raw(format!("{}\n", &self.shown[selected].description)),
                 Text::raw("\nExec: "),
@@ -208,6 +211,8 @@ impl<'a> App<'a> {
 }
 
 fn main() -> Result<(), failure::Error> {
+    let opts = cli::Opts::from_args();
+
     let mut dirs: Vec<path::PathBuf> = vec![];
     for dir in &[
         "/usr/share/applications".to_string(),
@@ -235,7 +240,7 @@ fn main() -> Result<(), failure::Error> {
     // App
     let mut app = App::new(apps);
 
-    app.update_info();
+    app.update_info(opts.highlight_color);
 
     loop {
         terminal.draw(|mut f| {
@@ -269,17 +274,17 @@ fn main() -> Result<(), failure::Error> {
                 .items(&app.shown)
                 .select(app.selected)
                 .style(style)
-                .highlight_style(style.fg(Color::LightBlue).modifier(Modifier::BOLD))
+                .highlight_style(style.fg(opts.highlight_color).modifier(Modifier::BOLD))
                 .highlight_symbol(">")
                 .render(&mut f, bottom_chunks[0]);
 
             // Query
             Paragraph::new(
                 [
-                    Text::styled(">", Style::default().fg(Color::LightBlue)),
+                    Text::styled(">", Style::default().fg(opts.highlight_color)),
                     Text::raw("> "),
                     Text::raw(&app.query),
-                    Text::raw("█"),
+                    Text::raw(&opts.cursor_char),
                 ]
                 .iter(),
             )
@@ -335,7 +340,7 @@ fn main() -> Result<(), failure::Error> {
             Event::Tick => (),
         }
 
-        app.update_info();
+        app.update_info(opts.highlight_color);
     }
 
     if let Some(selected) = app.selected {
@@ -343,29 +348,40 @@ fn main() -> Result<(), failure::Error> {
 
         let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
 
+        let mut exec;
+
         if !app_to_run.terminal_exec {
+            exec = process::Command::new(&commands[0]);
+
             unsafe {
-                process::Command::new(&commands[0])
-                    .pre_exec(|| {
-                        libc::setsid();
-                        Ok(())
-                    })
-                    .args(&commands[1..])
-                    .spawn()
-                    .expect("Failed to run program");
+                exec.pre_exec(|| {
+                    libc::setsid();
+                    Ok(())
+                });
             }
+
+            exec.args(&commands[1..]);
         } else {
+            let terminal_exec = &opts.terminal_launcher.split(' ').collect::<Vec<&str>>();
+            exec = process::Command::new(&terminal_exec[0]);
+
             unsafe {
-                process::Command::new("alacritty")
-                    .pre_exec(|| {
-                        libc::setsid();
-                        Ok(())
-                    })
-                    .arg("-e")
-                    .args(&commands)
-                    .spawn()
-                    .expect("Failed to run program");
+                exec.pre_exec(|| {
+                    libc::setsid();
+                    Ok(())
+                });
             }
+
+            exec.args(&terminal_exec[1..]).args(&commands);
+        }
+        if opts.no_launched_inherit_stdio {
+            exec.stdin(process::Stdio::null())
+                .stdout(process::Stdio::null())
+                .stderr(process::Stdio::null())
+                .spawn()
+                .expect("Failed to run program");
+        } else {
+            exec.spawn().expect("Failed to run program");
         }
     }
 

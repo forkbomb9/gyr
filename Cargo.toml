@@ -5,9 +5,11 @@ authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
 edition = "2018"
 
 [dependencies]
+clap = "2.33"
 failure = "0.1"
 fuzzy-filter = "0.1"
 libc = "0.2"
 regex = "1"
 termion = "1.5"
 tui = "0.8"
+structopt = "0.3"
