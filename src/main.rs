@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 mod cli;
 #[allow(dead_code)]
 mod event;
@@ -353,6 +355,9 @@ fn main() -> Result<(), failure::Error> {
         if !app_to_run.terminal_exec {
             exec = process::Command::new(&commands[0]);
 
+            // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
+            // process is already a process group leader (which isn't)
+            #[allow(unsafe_code)]
             unsafe {
                 exec.pre_exec(|| {
                     libc::setsid();
@@ -365,6 +370,9 @@ fn main() -> Result<(), failure::Error> {
             let terminal_exec = &opts.terminal_launcher.split(' ').collect::<Vec<&str>>();
             exec = process::Command::new(&terminal_exec[0]);
 
+            // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
+            // process is already a process group leader (which isn't)
+            #[allow(unsafe_code)]
             unsafe {
                 exec.pre_exec(|| {
                     libc::setsid();
