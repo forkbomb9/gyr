@@ -271,7 +271,7 @@ fn main() -> Result<(), failure::Error> {
 
             // Text for description
             Paragraph::new(app.text.iter())
-                .block(block.title("WLauncher"))
+                .block(block.title("Fantastic Launcher"))
                 .style(Style::default())
                 .alignment(Alignment::Left)
                 .wrap(true)
