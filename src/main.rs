@@ -160,7 +160,11 @@ impl<'a> App<'a> {
                     Style::default().fg(color),
                 ),
                 Text::raw(format!("{}\n", &self.shown[selected].description)),
-                Text::raw("\nExec: "),
+                if self.shown[selected].terminal_exec {
+                    Text::raw("\nExec (terminal): ")
+                } else {
+                    Text::raw("\nExec: ")
+                },
                 Text::styled(
                     format!("{}", &self.shown[selected].exec),
                     Style::default().fg(Color::DarkGray),
