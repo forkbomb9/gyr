@@ -1,23 +1,17 @@
 #![deny(unsafe_code)]
 
+mod apps;
 mod cli;
-#[allow(dead_code)]
 mod event;
+mod ui;
+use ui::UI;
 
-use std::collections::HashMap;
-use std::convert;
-use std::fmt;
-use std::fs;
-use std::io;
 use std::os::unix::process::CommandExt;
+use std::io;
 use std::path;
 use std::process;
 
 use structopt::StructOpt;
-
-use fuzzy_filter::matches;
-
-use regex::Regex;
 
 use termion::event::Key;
 use termion::input::MouseTerminal;
@@ -26,198 +20,11 @@ use termion::screen::AlternateScreen;
 
 use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
-use tui::style::{Color, Modifier, Style};
+use tui::style::{Modifier, Style};
 use tui::widgets::{Block, Borders, Paragraph, SelectableList, Text, Widget};
 use tui::Terminal;
 
 use event::{Event, Events};
-
-fn read_applications(dirs: Vec<impl Into<path::PathBuf>>) -> Result<Vec<Application>, io::Error> {
-    let mut apps = Vec::new();
-
-    for dir in dirs {
-        let files = fs::read_dir(dir.into())?;
-
-        for file in files {
-            if let Ok(file) = file {
-                let contents = fs::read_to_string(file.path())?;
-                if contents.starts_with("[Desktop Entry]") {
-                    let contents = contents.trim_start_matches("[Desktop Entry]\n");
-                    if let Ok(app) = Application::parse(contents) {
-                        apps.push(app);
-                    }
-                }
-            }
-        }
-    }
-
-    apps.sort();
-
-    Ok(apps)
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-struct Application {
-    name: String,
-    exec: String,
-    description: String,
-    terminal_exec: bool,
-}
-
-impl fmt::Display for Application {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
-// This is needed for the SelectableList widget.
-impl convert::AsRef<str> for Application {
-    fn as_ref(&self) -> &str {
-        self.name.as_ref()
-    }
-}
-
-impl Application {
-    pub fn parse<T: Into<String>>(contents: T) -> Result<Application, failure::Error> {
-        let contents = contents.into();
-        let mut values = HashMap::new();
-        let keys: Vec<&str> = contents.split('\n').collect();
-
-        if keys.len() > 0 {
-            for key in keys {
-                if key != "" {
-                    let splitted = key.splitn(2, '=').collect::<Vec<&str>>();
-                    if splitted.len() == 2 {
-                        values.entry(splitted[0]).or_insert(splitted[1]);
-                    } else {
-                        values.entry(splitted[0]).or_insert("empty");
-                    }
-                }
-            }
-        }
-
-        if let Some(key) = values.get("NoDisplay") {
-            if key.to_lowercase() == "true" {
-                failure::bail!("App is hidden");
-            }
-        }
-
-        let exec_trimmed;
-        {
-            let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
-            let mut exec = values.get("Exec").unwrap_or(&"unknow").to_string();
-
-            if let Some(range) = re.find(&exec.clone()) {
-                exec.replace_range(range.start()..range.end(), "");
-            }
-            exec_trimmed = exec;
-        }
-
-        let terminal_exec = if values.get("Terminal").unwrap_or(&"false") == &"true" {
-            true
-        } else {
-            false
-        };
-
-        Ok(Application {
-            name: values.get("Name").unwrap_or(&"Unknow").to_string(),
-            exec: exec_trimmed,
-            description: values
-                .get("Comment")
-                .unwrap_or(&"No description")
-                .to_string(),
-            terminal_exec: terminal_exec,
-        })
-    }
-}
-
-struct App<'a> {
-    hidden: Vec<Application>,
-    shown: Vec<Application>,
-    selected: Option<usize>,
-    text: Vec<Text<'a>>,
-    query: String,
-    log: Vec<Text<'a>>,
-}
-
-impl<'a> App<'a> {
-    fn new(items: Vec<Application>) -> App<'a> {
-        App {
-            shown: items,
-            hidden: vec![],
-            selected: Some(0),
-            text: vec![],
-            query: String::new(),
-            log: vec![],
-        }
-    }
-
-    fn update_info(&mut self, color: Color) {
-        if let Some(selected) = self.selected {
-            self.text = vec![
-                Text::styled(
-                    format!("{}\n\n", &self.shown[selected].name),
-                    Style::default().fg(color),
-                ),
-                Text::raw(format!("{}\n", &self.shown[selected].description)),
-                if self.shown[selected].terminal_exec {
-                    Text::raw("\nExec (terminal): ")
-                } else {
-                    Text::raw("\nExec: ")
-                },
-                Text::styled(
-                    format!("{}", &self.shown[selected].exec),
-                    Style::default().fg(Color::DarkGray),
-                ),
-            ];
-        } else {
-            self.text.clear();
-        }
-    }
-
-    fn update_filter(&mut self) {
-        // I could use self.hidden.push(
-        //                  self.shown.drain_filter(
-        //                      |i| !matches(&self.query, n.lo_lowercase()
-        //                  )
-        //              ));
-        // but Vec::drain_filter() it's nightly-only (for now)
-        let mut i = 0;
-        while i != self.shown.len() {
-            if !matches(&self.query, &self.shown[i].name.to_lowercase()) {
-                &self.hidden.push(self.shown.remove(i));
-            } else {
-                i += 1;
-            }
-        }
-
-        for item in &self.hidden {
-            if matches(&self.query, &item.name.to_lowercase()) && !self.shown.contains(item) {
-                self.shown.push(item.clone());
-            }
-        }
-
-        self.shown.sort();
-
-        // self.shown.clear();
-        // for item in &self.items {
-        //     if matches(&self.query, &item.name.to_lowercase()) {
-        //         self.shown.push(item.clone());
-        //     }
-        // }
-
-        if self.shown.is_empty() {
-            self.selected = None;
-            self.log.push(Text::raw("NO ITEMS!"));
-        }
-
-        if !self.selected.is_some() && !self.shown.is_empty() {
-            self.selected = Some(0);
-        }
-
-        self.log.push(Text::raw("update_filter\n"));
-    }
-}
 
 fn main() -> Result<(), failure::Error> {
     let opts = cli::Opts::from_args();
@@ -234,7 +41,7 @@ fn main() -> Result<(), failure::Error> {
         }
     }
 
-    let apps = read_applications(dirs)?;
+    let apps = apps::read(dirs)?;
 
     // Terminal initialization
     let stdout = io::stdout().into_raw_mode()?;
@@ -246,10 +53,10 @@ fn main() -> Result<(), failure::Error> {
 
     let events = Events::new();
 
-    // App
-    let mut app = App::new(apps);
+    // UI
+    let mut ui = UI::new(apps);
 
-    app.update_info(opts.highlight_color);
+    ui.update_info(opts.highlight_color);
 
     loop {
         terminal.draw(|mut f| {
@@ -270,7 +77,7 @@ fn main() -> Result<(), failure::Error> {
                 .split(chunks[1]);
 
             // Text for description
-            Paragraph::new(app.text.iter())
+            Paragraph::new(ui.text.iter())
                 .block(block.title("Fantastic Launcher"))
                 .style(Style::default())
                 .alignment(Alignment::Left)
@@ -280,8 +87,8 @@ fn main() -> Result<(), failure::Error> {
             // App list
             SelectableList::default()
                 .block(block.title("Apps").borders(Borders::ALL))
-                .items(&app.shown)
-                .select(app.selected)
+                .items(&ui.shown)
+                .select(ui.selected)
                 .style(style)
                 .highlight_style(style.fg(opts.highlight_color).modifier(Modifier::BOLD))
                 .highlight_symbol(">")
@@ -292,7 +99,7 @@ fn main() -> Result<(), failure::Error> {
                 [
                     Text::styled(">", Style::default().fg(opts.highlight_color)),
                     Text::raw("> "),
-                    Text::raw(&app.query),
+                    Text::raw(&ui.query),
                     Text::raw(&opts.cursor_char),
                 ]
                 .iter(),
@@ -313,22 +120,22 @@ fn main() -> Result<(), failure::Error> {
                     break;
                 }
                 Key::Char(c) => {
-                    app.query.push(c);
-                    app.update_filter();
+                    ui.query.push(c);
+                    ui.update_filter();
                 }
                 Key::Backspace => {
-                    app.query.pop();
-                    app.update_filter();
+                    ui.query.pop();
+                    ui.update_filter();
                 }
                 Key::Left => {
-                    app.selected = Some(0);
+                    ui.selected = Some(0);
                 }
                 Key::Right => {
-                    app.selected = Some(app.shown.len() - 1);
+                    ui.selected = Some(ui.shown.len() - 1);
                 }
                 Key::Down => {
-                    if let Some(selected) = app.selected {
-                        app.selected = if selected >= app.shown.len() - 1 {
+                    if let Some(selected) = ui.selected {
+                        ui.selected = if selected >= ui.shown.len() - 1 {
                             Some(0)
                         } else {
                             Some(selected + 1)
@@ -336,11 +143,11 @@ fn main() -> Result<(), failure::Error> {
                     }
                 }
                 Key::Up => {
-                    if let Some(selected) = app.selected {
-                        app.selected = if selected > 0 {
+                    if let Some(selected) = ui.selected {
+                        ui.selected = if selected > 0 {
                             Some(selected - 1)
                         } else {
-                            Some(app.shown.len() - 1)
+                            Some(ui.shown.len() - 1)
                         };
                     }
                 }
@@ -349,11 +156,11 @@ fn main() -> Result<(), failure::Error> {
             Event::Tick => (),
         }
 
-        app.update_info(opts.highlight_color);
+        ui.update_info(opts.highlight_color);
     }
 
-    if let Some(selected) = app.selected {
-        let app_to_run = &app.shown[selected];
+    if let Some(selected) = ui.selected {
+        let app_to_run = &ui.shown[selected];
 
         let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
 
