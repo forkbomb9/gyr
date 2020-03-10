@@ -6,6 +6,7 @@ mod event;
 mod ui;
 use ui::UI;
 
+use std::env;
 use std::os::unix::process::CommandExt;
 use std::io;
 use std::path;
@@ -165,6 +166,10 @@ fn main() -> Result<(), failure::Error> {
         let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
 
         let mut exec;
+
+        if let Some(path) = &app_to_run.path {
+            env::set_current_dir(path::PathBuf::from(path))?;
+        }
 
         if !app_to_run.terminal_exec {
             exec = process::Command::new(&commands[0]);
