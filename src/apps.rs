@@ -53,13 +53,11 @@ impl Application {
     pub fn parse<T: Into<String>>(contents: T) -> Result<Application, failure::Error> {
         let contents = contents.into();
 
-        let mut app = Application {
-            name: "Unknow".to_string(),
-            exec: "nothing".to_string(),
-            description: "No description".to_string(),
-            terminal_exec: false,
-            path: None,
-        };
+        let mut name = None;
+        let mut exec = None;
+        let mut description = None;
+        let mut terminal_exec = false;
+        let mut path = None;
 
         let mut search = false;
 
@@ -73,17 +71,17 @@ impl Application {
             }
 
             if search {
-                if line.starts_with("Name=") {
+                if line.starts_with("Name=") && !name.is_some() {
                     let line = line.trim_start_matches("Name=");
-                    app.name = line.to_string();
-                } else if line.starts_with("Comment=") {
+                    name = Some(line.to_string());
+                } else if line.starts_with("Comment=") && !description.is_some() {
                     let line = line.trim_start_matches("Comment=");
-                    app.description = line.to_string();
+                    description = Some(line.to_string());
                 } else if line.starts_with("Terminal=") {
                     if line.trim_start_matches("Terminal=") == "true" {
-                        app.terminal_exec = true;
+                        terminal_exec = true;
                     }
-                } else if line.starts_with("Exec=") {
+                } else if line.starts_with("Exec=") && !exec.is_some() {
                     let line = line.trim_start_matches("Exec=");
 
                     let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
@@ -93,16 +91,16 @@ impl Application {
                         trimming.replace_range(range.start()..range.end(), "");
                     }
 
-                    app.exec = trimming.to_string();
+                    exec = Some(trimming.to_string());
                 } else if line.starts_with("NoDisplay=") {
                     let line = line.trim_start_matches("NoDisplay=");
                     if line.to_lowercase() == "true" {
                         failure::bail!("App is hidden");
                     }
-                }
-                } else if line.starts_with("Path=") && !app.path.is_some() {
+                } else if line.starts_with("Path=") && !path.is_some() {
                     let line = line.trim_start_matches("Path=");
-                    app.path = Some(line.to_string());
+                    path = Some(line.to_string());
+
                 // } else if line.starts_with("Actions=") && !actions.is_some() && !action.is_some() {
                 //     let line = line.trim_start_matches("Actions=");
                 //     let vector = line
@@ -112,7 +110,14 @@ impl Application {
                 //     actions = Some(vector);
                 }
             }
+        }
 
-        Ok(app)
+        Ok(Application {
+            name: name.unwrap_or("Unknown".to_string()),
+            exec: exec.unwrap_or("Unknown".to_string()),
+            description: description.unwrap_or("Unknown".to_string()),
+            terminal_exec: terminal_exec,
+            path: path,
+        })
     }
 }
