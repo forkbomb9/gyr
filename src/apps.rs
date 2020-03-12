@@ -45,7 +45,6 @@ pub struct Application {
     // This is not pub because I use it only on this file
     #[doc(hidden)]
     actions: Option<Vec<String>>,
-    action_from: Option<String>,
 }
 
 impl fmt::Display for Application {
@@ -80,7 +79,6 @@ impl Application {
         let mut terminal_exec = false;
         let mut path = None;
         let mut actions = None;
-        let mut action_from = None;
 
         let mut search = false;
 
@@ -97,7 +95,6 @@ impl Application {
                 if line.starts_with("Name=") && !name.is_some() {
                     let line = line.trim_start_matches("Name=");
                     if let Some(a) = &action {
-                        action_from = Some(a.name.clone());
                         name = Some(format!("{} ({})", &a.from, line));
                     } else {
                         name = Some(line.to_string());
@@ -147,7 +144,6 @@ impl Application {
             terminal_exec,
             path,
             actions,
-            action_from,
         })
     }
 }
