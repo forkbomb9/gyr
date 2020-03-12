@@ -144,10 +144,10 @@ impl Application {
             name: name.unwrap_or("Unknown".to_string()),
             exec: exec.unwrap_or("Unknown".to_string()),
             description: description.unwrap_or("Unknown".to_string()),
-            terminal_exec: terminal_exec,
-            path: path,
-            actions: actions,
-            action_from: action_from,
+            terminal_exec,
+            path,
+            actions,
+            action_from,
         })
     }
 }
