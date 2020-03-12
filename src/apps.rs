@@ -61,7 +61,10 @@ impl convert::AsRef<str> for Application {
 }
 
 impl Application {
-    pub fn parse<T: Into<String>>(contents: T, action: Option<Action>) -> Result<Application, failure::Error> {
+    pub fn parse<T: Into<String>>(
+        contents: T,
+        action: Option<Action>,
+    ) -> Result<Application, failure::Error> {
         let contents = contents.into();
 
         let pattern = if let Some(a) = &action {
@@ -125,7 +128,6 @@ impl Application {
                 } else if line.starts_with("Path=") && !path.is_some() {
                     let line = line.trim_start_matches("Path=");
                     path = Some(line.to_string());
-
                 } else if line.starts_with("Actions=") && !actions.is_some() && !action.is_some() {
                     let line = line.trim_start_matches("Actions=");
                     let vector = line
@@ -137,10 +139,20 @@ impl Application {
             }
         }
 
+        let name = name.unwrap_or("Unknown".to_string());
+
+        let exec = if let Some(exec) = exec {
+            exec.to_string()
+        } else {
+            failure::bail!("No command to run!");
+        };
+
+        let description = description.unwrap_or_default();
+
         Ok(Application {
-            name: name.unwrap_or("Unknown".to_string()),
-            exec: exec.unwrap_or("Unknown".to_string()),
-            description: description.unwrap_or("Unknown".to_string()),
+            name,
+            exec,
+            description,
             terminal_exec,
             path,
             actions,
