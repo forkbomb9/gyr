@@ -14,8 +14,6 @@ use std::io;
 use std::path;
 use std::process;
 
-use structopt::StructOpt;
-
 use termion::event::Key;
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
@@ -30,7 +28,7 @@ use tui::Terminal;
 use event::{Event, Events};
 
 fn main() -> anyhow::Result<()> {
-    let opts = cli::Opts::from_args();
+    let opts = cli::Opts::new();
 
     let mut dirs: Vec<path::PathBuf> = vec![];
     for dir in &[

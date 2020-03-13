@@ -10,6 +10,7 @@ anyhow = "1.0"
 fuzzy-filter = "0.1"
 libc = "0.2"
 regex = "1"
+serde = { version = "1", features = ["derive"] }
 termion = "1.5"
+toml = "0.5"
 tui = "0.8"
-structopt = "0.3"
