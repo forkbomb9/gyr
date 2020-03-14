@@ -160,18 +160,10 @@ impl Application {
     }
 }
 
+#[derive(Default)]
 pub struct Action {
     from: String,
     name: String,
-}
-
-impl Default for Action {
-    fn default() -> Self {
-        Self {
-            from: String::new(),
-            name: String::new(),
-        }
-    }
 }
 
 impl Action {
