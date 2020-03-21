@@ -6,6 +6,8 @@ mod event;
 mod ui;
 use ui::UI;
 
+use anyhow::Context;
+
 use std::env;
 use std::os::unix::process::CommandExt;
 use std::io;
@@ -27,7 +29,7 @@ use tui::Terminal;
 
 use event::{Event, Events};
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> anyhow::Result<()> {
     let opts = cli::Opts::from_args();
 
     let mut dirs: Vec<path::PathBuf> = vec![];
@@ -45,12 +47,17 @@ fn main() -> Result<(), failure::Error> {
     let apps = apps::read(dirs)?;
 
     // Terminal initialization
-    let stdout = io::stdout().into_raw_mode()?;
+    let stdout = io::stdout()
+        .into_raw_mode()
+        .with_context(|| "Failed to init stdout")?;
     let stdout = MouseTerminal::from(stdout);
     let stdout = AlternateScreen::from(stdout);
     let backend = TermionBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-    terminal.hide_cursor()?;
+    let mut terminal =
+        Terminal::new(backend).with_context(|| "Failed to start termion::Terminal")?;
+    terminal
+        .hide_cursor()
+        .with_context(|| "Failed to hide cursor")?;
 
     let events = Events::new();
 
@@ -168,7 +175,9 @@ fn main() -> Result<(), failure::Error> {
         let mut exec;
 
         if let Some(path) = &app_to_run.path {
-            env::set_current_dir(path::PathBuf::from(path))?;
+            env::set_current_dir(path::PathBuf::from(path)).with_context(|| {
+                format!("Failed to switch to {} when starting {}", path, app_to_run)
+            })?;
         }
 
         if !app_to_run.terminal_exec {
@@ -206,9 +215,10 @@ fn main() -> Result<(), failure::Error> {
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())
                 .spawn()
-                .expect("Failed to run program");
+                .with_context(|| format!("Failed to run {:?}", exec))?;
         } else {
-            exec.spawn().expect("Failed to run program");
+            exec.spawn()
+                .with_context(|| format!("Failed to run {:?}", exec))?;
         }
     }
 

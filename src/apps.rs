@@ -1,20 +1,23 @@
+use anyhow::{anyhow, Context};
+
 use std::convert;
 use std::fmt;
 use std::fs;
-use std::io;
 use std::path;
 
 use regex::Regex;
 
-pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> Result<Vec<Application>, io::Error> {
+pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Application>> {
     let mut apps = Vec::new();
 
     for dir in dirs {
-        let files = fs::read_dir(dir.into())?;
+        let dir = dir.into();
+        let files = fs::read_dir(&dir).with_context(|| format!("Failed to open dir {}", dir.display()))?;
 
         for file in files {
             if let Ok(file) = file {
-                let contents = fs::read_to_string(file.path())?;
+                let contents = fs::read_to_string(file.path())
+                    .with_context(|| format!("Failed to read contents from {}", file.path().display()))?;
                 if let Ok(app) = Application::parse(&contents, None) {
                     if let Some(actions) = &app.actions {
                         for action in actions {
@@ -64,12 +67,12 @@ impl Application {
     pub fn parse<T: Into<String>>(
         contents: T,
         action: Option<Action>,
-    ) -> Result<Application, failure::Error> {
+    ) -> anyhow::Result<Application> {
         let contents = contents.into();
 
         let pattern = if let Some(a) = &action {
             if a.name == "" {
-                failure::bail!("Action is empty");
+                return Err(anyhow!("Action is empty"));
             }
             format!("[Desktop Action {}]", a.name)
         } else {
@@ -123,7 +126,7 @@ impl Application {
                 } else if line.starts_with("NoDisplay=") {
                     let line = line.trim_start_matches("NoDisplay=");
                     if line.to_lowercase() == "true" {
-                        failure::bail!("App is hidden");
+                        return Err(anyhow!("App is hidden"));
                     }
                 } else if line.starts_with("Path=") && !path.is_some() {
                     let line = line.trim_start_matches("Path=");
@@ -144,7 +147,7 @@ impl Application {
         let exec = if let Some(exec) = exec {
             exec.to_string()
         } else {
-            failure::bail!("No command to run!");
+            return Err(anyhow!("No command to run!"));
         };
 
         let description = description.unwrap_or_default();
