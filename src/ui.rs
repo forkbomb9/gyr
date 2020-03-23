@@ -92,4 +92,3 @@ impl<'a> UI<'a> {
         self.log.push(Text::raw("update_filter\n"));
     }
 }
-

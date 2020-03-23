@@ -9,8 +9,8 @@ use ui::UI;
 use anyhow::Context;
 
 use std::env;
-use std::os::unix::process::CommandExt;
 use std::io;
+use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
 

@@ -12,12 +12,14 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Applicati
 
     for dir in dirs {
         let dir = dir.into();
-        let files = fs::read_dir(&dir).with_context(|| format!("Failed to open dir {}", dir.display()))?;
+        let files =
+            fs::read_dir(&dir).with_context(|| format!("Failed to open dir {}", dir.display()))?;
 
         for file in files {
             if let Ok(file) = file {
-                let contents = fs::read_to_string(file.path())
-                    .with_context(|| format!("Failed to read contents from {}", file.path().display()))?;
+                let contents = fs::read_to_string(file.path()).with_context(|| {
+                    format!("Failed to read contents from {}", file.path().display())
+                })?;
                 if let Ok(app) = Application::parse(&contents, None) {
                     if let Some(actions) = &app.actions {
                         for action in actions {

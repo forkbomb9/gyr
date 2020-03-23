@@ -71,11 +71,9 @@ impl Opts {
             )
             .get_matches();
 
-        let config_file = env::var("HOME").expect("No home dir") + "/.config" + "/flauncher" + "/config";
-        let files = vec![
-            matches.value_of("config"),
-            Some(&config_file),
-        ];
+        let config_file =
+            env::var("HOME").expect("No home dir") + "/.config" + "/flauncher" + "/config";
+        let files = vec![matches.value_of("config"), Some(&config_file)];
         let mut file_conf: Option<FileConf> = None;
 
         for file in files {
