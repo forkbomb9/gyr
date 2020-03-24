@@ -50,12 +50,6 @@ impl<'a> UI<'a> {
     }
 
     pub fn update_filter(&mut self) {
-        // I could use self.hidden.push(
-        //                  self.shown.drain_filter(
-        //                      |i| !matches(&self.query, n.lo_lowercase()
-        //                  )
-        //              ));
-        // but Vec::drain_filter() it's nightly-only (for now)
         let mut i = 0;
         while i != self.shown.len() {
             if !matches(&self.query, &self.shown[i].name.to_lowercase()) {
@@ -73,19 +67,10 @@ impl<'a> UI<'a> {
 
         self.shown.sort();
 
-        // self.shown.clear();
-        // for item in &self.items {
-        //     if matches(&self.query, &item.name.to_lowercase()) {
-        //         self.shown.push(item.clone());
-        //     }
-        // }
-
         if self.shown.is_empty() {
             self.selected = None;
             self.log.push(Text::raw("NO ITEMS!"));
-        }
-
-        if !self.selected.is_some() && !self.shown.is_empty() {
+        } else {
             self.selected = Some(0);
         }
 
