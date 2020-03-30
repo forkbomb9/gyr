@@ -103,6 +103,11 @@ fn main() -> anyhow::Result<()> {
             // Query
             Paragraph::new(
                 [
+                    Text::raw("("),
+                    Text::styled((ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(), Style::default().fg(opts.highlight_color)),
+                    Text::raw("/"),
+                    Text::raw(ui.shown.len().to_string()),
+                    Text::raw(") "),
                     Text::styled(">", Style::default().fg(opts.highlight_color)),
                     Text::raw("> "),
                     Text::raw(&ui.query),
