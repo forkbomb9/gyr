@@ -40,7 +40,7 @@ impl<'a> UI<'a> {
                     Text::raw("\nExec: ")
                 },
                 Text::styled(
-                    format!("{}", &self.shown[selected].exec),
+                    self.shown[selected].exec.to_string(),
                     Style::default().fg(Color::DarkGray),
                 ),
             ];
@@ -53,7 +53,7 @@ impl<'a> UI<'a> {
         let mut i = 0;
         while i != self.shown.len() {
             if !matches(&self.query, &self.shown[i].name.to_lowercase()) {
-                &self.hidden.push(self.shown.remove(i));
+                self.hidden.push(self.shown.remove(i));
             } else {
                 i += 1;
             }

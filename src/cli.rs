@@ -84,14 +84,13 @@ impl Opts {
                         // matches.value_of("config")
                         file_conf = Some(conf);
                         break;
-                    }
-                    Err(e) => match e.kind() {
-                        io::ErrorKind::InvalidData => {
+                    },
+                    Err(e) => {
+                        if io::ErrorKind::InvalidData == e.kind() {
                             println!("Error reading config file {}:\n{}", f, e);
                             std::process::exit(1);
                         }
-                        _ => (),
-                    },
+                    }
                 }
             }
         }

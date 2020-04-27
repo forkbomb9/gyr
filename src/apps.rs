@@ -100,27 +100,27 @@ impl Application {
             }
 
             if search {
-                if line.starts_with("Name=") && !name.is_some() {
+                if line.starts_with("Name=") && name.is_none() {
                     let line = line.trim_start_matches("Name=");
                     if let Some(a) = &action {
                         name = Some(format!("{} ({})", &a.from, line));
                     } else {
                         name = Some(line.to_string());
                     }
-                } else if line.starts_with("Comment=") && !description.is_some() {
+                } else if line.starts_with("Comment=") && description.is_none() {
                     let line = line.trim_start_matches("Comment=");
                     description = Some(line.to_string());
                 } else if line.starts_with("Terminal=") {
                     if line.trim_start_matches("Terminal=") == "true" {
                         terminal_exec = true;
                     }
-                } else if line.starts_with("Exec=") && !exec.is_some() {
+                } else if line.starts_with("Exec=") && exec.is_none() {
                     let line = line.trim_start_matches("Exec=");
 
                     let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
                     let mut trimming = line.to_string();
 
-                    if let Some(range) = re.find(&line.clone()) {
+                    if let Some(range) = re.find(&line) {
                         trimming.replace_range(range.start()..range.end(), "");
                     }
 
@@ -130,10 +130,10 @@ impl Application {
                     if line.to_lowercase() == "true" {
                         return Err(anyhow!("App is hidden"));
                     }
-                } else if line.starts_with("Path=") && !path.is_some() {
+                } else if line.starts_with("Path=") && path.is_none() {
                     let line = line.trim_start_matches("Path=");
                     path = Some(line.to_string());
-                } else if line.starts_with("Actions=") && !actions.is_some() && !action.is_some() {
+                } else if line.starts_with("Actions=") && actions.is_none() && action.is_none() {
                     let line = line.trim_start_matches("Actions=");
                     let vector = line
                         .split(';')
@@ -144,10 +144,10 @@ impl Application {
             }
         }
 
-        let name = name.unwrap_or("Unknown".to_string());
+        let name = name.unwrap_or_else(|| "Unknown".to_string());
 
-        let exec = if let Some(exec) = exec {
-            exec.to_string()
+        let exec = if let Some(e) = exec {
+            e
         } else {
             return Err(anyhow!("No command to run!"));
         };
