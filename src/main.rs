@@ -62,13 +62,17 @@ fn main() -> anyhow::Result<()> {
     // UI
     let mut ui = UI::new(apps);
 
+    if opts.verbose {
+        ui.show_exec(true);
+    }
+
     ui.update_info(opts.highlight_color);
 
     loop {
         terminal.draw(|mut f| {
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
-                .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
+                .constraints([Constraint::Length(8), Constraint::Min(2)].as_ref())
                 .split(f.size());
 
             let style = Style::default();

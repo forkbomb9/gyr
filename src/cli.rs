@@ -12,6 +12,7 @@ pub struct Opts {
     pub no_launched_inherit_stdio: bool,
     pub terminal_launcher: String,
     pub cursor_char: String,
+    pub verbose: bool,
 }
 
 impl Default for Opts {
@@ -21,6 +22,7 @@ impl Default for Opts {
             no_launched_inherit_stdio: false,
             terminal_launcher: "alacritty -e".to_string(),
             cursor_char: "█".to_string(),
+            verbose: false,
         }
     }
 }
@@ -68,6 +70,11 @@ impl Opts {
                     .long("cursor")
                     .help("Cursor char for the search")
                     .takes_value(true),
+            )
+            .arg(
+                Arg::with_name("verbose")
+                .short("v")
+                .help("Be verbose (for now, show command to run)"),
             )
             .get_matches();
 
@@ -120,6 +127,10 @@ impl Opts {
             default.terminal_launcher = command.to_string();
         } else if let Some(command) = file_conf.terminal_launcher {
             default.terminal_launcher = command;
+        }
+
+        if matches.is_present("verbose") {
+            default.verbose = true;
         }
 
         if let Some(r#char) = matches.value_of("cursor_char") {

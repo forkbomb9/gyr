@@ -12,6 +12,7 @@ pub struct UI<'a> {
     pub text: Vec<Text<'a>>,
     pub query: String,
     pub log: Vec<Text<'a>>,
+    pub show_exec: bool,
 }
 
 impl<'a> UI<'a> {
@@ -23,7 +24,12 @@ impl<'a> UI<'a> {
             text: vec![],
             query: String::new(),
             log: vec![],
+            show_exec: false,
         }
+    }
+
+    pub fn show_exec(&mut self, b: bool) {
+        self.show_exec = b;
     }
 
     pub fn update_info(&mut self, color: Color) {
@@ -34,16 +40,18 @@ impl<'a> UI<'a> {
                     Style::default().fg(color),
                 ),
                 Text::raw(format!("{}\n", &self.shown[selected].description)),
-                if self.shown[selected].terminal_exec {
+            ];
+            if self.show_exec {
+                self.text.push(if self.shown[selected].terminal_exec {
                     Text::raw("\nExec (terminal): ")
                 } else {
                     Text::raw("\nExec: ")
-                },
-                Text::styled(
+                });
+                self.text.push(Text::styled(
                     self.shown[selected].exec.to_string(),
                     Style::default().fg(Color::DarkGray),
-                ),
-            ];
+                ));
+            }
         } else {
             self.text.clear();
         }
