@@ -18,7 +18,7 @@ gitlab = { repository = "forkbomb9/flauncher"}
 [dependencies]
 clap = "2.33"
 anyhow = "1.0"
-fuzzy-filter = "0.1"
+fuzzy-matcher = "0.3"
 libc = "0.2"
 regex = "1"
 serde = { version = "1", features = ["derive"] }

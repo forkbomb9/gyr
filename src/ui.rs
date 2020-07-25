@@ -1,4 +1,4 @@
-use fuzzy_filter::matches;
+use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
 
 use tui::style::{Color, Style};
 use tui::widgets::Text;
@@ -13,6 +13,8 @@ pub struct UI<'a> {
     pub query: String,
     pub log: Vec<Text<'a>>,
     pub show_exec: bool,
+    #[doc(hidden)]
+    matcher: SkimMatcherV2,
 }
 
 impl<'a> UI<'a> {
@@ -25,6 +27,7 @@ impl<'a> UI<'a> {
             query: String::new(),
             log: vec![],
             show_exec: false,
+            matcher: SkimMatcherV2::default(),
         }
     }
 
@@ -60,16 +63,21 @@ impl<'a> UI<'a> {
     pub fn update_filter(&mut self) {
         let mut i = 0;
         while i != self.shown.len() {
-            if !matches(&self.query, &self.shown[i].name.to_lowercase()) {
+            if self.matcher.fuzzy_match(&self.shown[i].name, &self.query).is_none() {
+                self.shown[i].score = 0;
                 self.hidden.push(self.shown.remove(i));
             } else {
                 i += 1;
             }
         }
 
-        for item in &self.hidden {
-            if matches(&self.query, &item.name.to_lowercase()) && !self.shown.contains(item) {
-                self.shown.push(item.clone());
+        i = 0;
+        while i != self.hidden.len() {
+            if let Some(score) = self.matcher.fuzzy_match(&self.hidden[i].name, &self.query) {
+                    self.hidden[i].score = score;
+                    self.shown.push(self.hidden.remove(i));
+            } else {
+                i += 1;
             }
         }
 

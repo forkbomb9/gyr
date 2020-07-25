@@ -42,6 +42,8 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Applicati
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Application {
+    // Matching score, first so that wee sort by score instead of name
+    pub score: i64,
     pub name: String,
     pub exec: String,
     pub description: String,
@@ -155,6 +157,7 @@ impl Application {
         let description = description.unwrap_or_default();
 
         Ok(Application {
+            score: 0,
             name,
             exec,
             description,
