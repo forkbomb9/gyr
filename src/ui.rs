@@ -85,7 +85,8 @@ impl<'a> UI<'a> {
             }
         }
 
-        self.shown.sort();
+        // NOTE: We're not using Vec::sort(), because it doesn't sort it the way we want
+        self.shown.sort_by(|a, b| a.cmp(b));
 
         if self.shown.is_empty() {
             self.selected = None;

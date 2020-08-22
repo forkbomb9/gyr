@@ -40,7 +40,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Applicati
     Ok(apps)
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd)]
 pub struct Application {
     // Matching score, first so that wee sort by score instead of name
     pub score: i64,
@@ -52,6 +52,19 @@ pub struct Application {
     // This is not pub because I use it only on this file
     #[doc(hidden)]
     actions: Option<Vec<String>>,
+}
+
+// NOTE: Custom Ord implementation.
+// We want to sort by score first, then name, but the score sorts from highest to lowest.
+impl Ord for Application {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.score
+            .cmp(&other.score)
+            // Reverse score, sort highest to lowest
+            .reverse()
+            // And then compare the name too
+            .then(self.name.cmp(&other.name))
+    }
 }
 
 impl fmt::Display for Application {
