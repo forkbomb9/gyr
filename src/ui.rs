@@ -12,7 +12,7 @@ pub struct UI<'a> {
     pub text: Vec<Text<'a>>,
     pub query: String,
     pub log: Vec<Text<'a>>,
-    pub show_exec: bool,
+    pub verbose: u64,
     #[doc(hidden)]
     matcher: SkimMatcherV2,
 }
@@ -26,13 +26,13 @@ impl<'a> UI<'a> {
             text: vec![],
             query: String::new(),
             log: vec![],
-            show_exec: false,
+            verbose: 0,
             matcher: SkimMatcherV2::default(),
         }
     }
 
-    pub fn show_exec(&mut self, b: bool) {
-        self.show_exec = b;
+    pub fn verbose(&mut self, b: u64) {
+        self.verbose = b;
     }
 
     pub fn update_info(&mut self, color: Color) {
@@ -44,7 +44,7 @@ impl<'a> UI<'a> {
                 ),
                 Text::raw(format!("{}\n", &self.shown[selected].description)),
             ];
-            if self.show_exec {
+            if self.verbose > 0 {
                 self.text.push(if self.shown[selected].terminal_exec {
                     Text::raw("\nExec (terminal): ")
                 } else {
@@ -54,6 +54,9 @@ impl<'a> UI<'a> {
                     self.shown[selected].exec.to_string(),
                     Style::default().fg(Color::DarkGray),
                 ));
+                if self.verbose > 1 {
+                    self.text.push(Text::raw(format!("\nMatching score: {}", self.shown[selected].score)));
+                }
             }
         } else {
             self.text.clear();

@@ -12,7 +12,7 @@ pub struct Opts {
     pub no_launched_inherit_stdio: bool,
     pub terminal_launcher: String,
     pub cursor_char: String,
-    pub verbose: bool,
+    pub verbose: Option<u64>,
 }
 
 impl Default for Opts {
@@ -22,7 +22,7 @@ impl Default for Opts {
             no_launched_inherit_stdio: false,
             terminal_launcher: "alacritty -e".to_string(),
             cursor_char: "█".to_string(),
-            verbose: false,
+            verbose: None,
         }
     }
 }
@@ -74,7 +74,8 @@ impl Opts {
             .arg(
                 Arg::with_name("verbose")
                 .short("v")
-                .help("Be verbose (for now, show command to run)"),
+                .multiple(true)
+                .help("Verbosity level"),
             )
             .get_matches();
 
@@ -130,7 +131,7 @@ impl Opts {
         }
 
         if matches.is_present("verbose") {
-            default.verbose = true;
+            default.verbose = Some(matches.occurrences_of("verbose"));
         }
 
         if let Some(r#char) = matches.value_of("cursor_char") {

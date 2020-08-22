@@ -62,8 +62,8 @@ fn main() -> anyhow::Result<()> {
     // UI
     let mut ui = UI::new(apps);
 
-    if opts.verbose {
-        ui.show_exec(true);
+    if let Some(level) = opts.verbose {
+        ui.verbose(level)
     }
 
     ui.update_info(opts.highlight_color);
