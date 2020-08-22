@@ -63,11 +63,15 @@ impl<'a> UI<'a> {
     pub fn update_filter(&mut self) {
         let mut i = 0;
         while i != self.shown.len() {
-            if self.matcher.fuzzy_match(&self.shown[i].name, &self.query).is_none() {
-                self.shown[i].score = 0;
-                self.hidden.push(self.shown.remove(i));
-            } else {
-                i += 1;
+            match self.matcher.fuzzy_match(&self.shown[i].name, &self.query) {
+                None => {
+                    self.shown[i].score = 0;
+                    self.hidden.push(self.shown.remove(i));
+                },
+                Some(score) => {
+                    self.shown[i].score = score;
+                    i += 1;
+                }
             }
         }
 
