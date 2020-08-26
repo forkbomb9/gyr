@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
 edition = "2018"
 
-description = "A fast TUI app launcher for *BSD and Linux"
+description = "A blazing fast TUI launcher for *BSD and Linux"
 
 repository = "https://gitlab.com/forkbomb9/flauncher"
 readme = "README.md"

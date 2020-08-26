@@ -1,16 +1,17 @@
-# FLauncher
+# flauncher
 
 [![License](https://img.shields.io/crates/l/flauncher?style=flat-square)](https://gitlab.com/forkbomb9/flauncher/-/blob/master/LICENSE)
 [![Latest version](https://img.shields.io/crates/v/flauncher?style=flat-square)](https://crates.io/crates/flauncher)
 [![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/flauncher?style=flat-square)]()
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-Fantastic Launcher, a _fast_ TUI launcher for *BSD and Linux
+Fantastic Launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 
 ## Table of Contents
 
 - [Install](#install)
 - [Usage](#usage)
+- [TODO](#todos)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -36,6 +37,12 @@ Oh, yes: go to the bottom with the left arrow, top with right. Cancel pressing E
 It's useful for tiling WMs, e.g. [Sway](https://swaywm.org/) or [i3](https://i3wm.org/)
 
 You can configure some things with cli flags, check `flauncher --help`
+There's also a config file which can be placed in `$HOME/.config/flauncher/config.toml`/`$XDG_DATA_HOME/flauncher/config.toml` ([sample](./config.toml))
+
+## TODO
+
+* Most used entries first
+* Cached entries
 
 ## Contributing
 
