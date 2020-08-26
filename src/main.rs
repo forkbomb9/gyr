@@ -217,7 +217,7 @@ fn main() -> anyhow::Result<()> {
 
             exec.args(&terminal_exec[1..]).args(&commands);
         }
-        if opts.no_launched_inherit_stdio {
+        if !opts.inherit_stdio {
             exec.stdin(process::Stdio::null())
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())

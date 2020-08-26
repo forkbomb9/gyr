@@ -7,7 +7,7 @@ use toml;
 #[derive(Debug)]
 pub struct Opts {
     pub highlight_color: tui::style::Color,
-    pub no_launched_inherit_stdio: bool,
+    pub inherit_stdio: bool,
     pub terminal_launcher: String,
     pub cursor_char: String,
     pub verbose: Option<u64>,
@@ -17,7 +17,7 @@ impl Default for Opts {
     fn default() -> Self {
         Self {
             highlight_color: tui::style::Color::LightBlue,
-            no_launched_inherit_stdio: false,
+            inherit_stdio: true,
             terminal_launcher: "alacritty -e".to_string(),
             cursor_char: "█".to_string(),
             verbose: None,
@@ -28,52 +28,54 @@ impl Default for Opts {
 impl Opts {
     pub fn new() -> Self {
         let mut default = Self::default();
-        let matches = App::new("FLauncher")
+        let matches = App::new(env!("CARGO_PKG_NAME"))
             .version(env!("CARGO_PKG_VERSION"))
             .author("Namkhai B. <echo bmFta2hhaS5uM0Bwcm90b25tYWlsLmNvbQo= | base64 -d>")
-            .about("A fast TUI launcher for *BSD and Linux")
+            .about(env!("CARGO_PKG_DESCRIPTION"))
             .setting(AppSettings::ColoredHelp)
             .setting(AppSettings::UnifiedHelpMessage)
             .arg(
                 Arg::with_name("config")
                     .short("c")
                     .long("config")
-                    .value_name("config")
                     .help("Config file to use")
+                    .value_name("file")
                     .takes_value(true),
             )
             .arg(
                 Arg::with_name("highlight_color")
                     .long("color")
                     .help("Highlight color")
+                    .value_name("color")
                     .validator(|val| string_to_color(val).map(|_| ()).map_err(|e| e.to_string()))
                     .takes_value(true),
             )
             .arg(
-                Arg::with_name("no_launched_inherit_stdio")
+                Arg::with_name("inherit_stdio")
                     .short("n")
-                    .long("no-launched-inherit-stdio")
-                    .help("Don't inherit stdio for launched program"),
+                    .long("dont-inherit-stdio")
+                    .help("The launched app won't inherit the stdio (i.e. it won't print anything)"),
             )
             .arg(
                 Arg::with_name("terminal_launcher")
-                    .long("terminal-launcher")
                     .short("t")
-                    .value_name("Terminal launcher")
+                    .long("terminal-launcher")
                     .help("Command to run Terminal=true apps")
+                    .value_name("command")
                     .takes_value(true),
             )
             .arg(
                 Arg::with_name("cursor_char")
                     .long("cursor")
-                    .help("Cursor char for the search")
+                    .help("Cursor character for the search")
+                    .value_name("char")
                     .takes_value(true),
             )
             .arg(
                 Arg::with_name("verbose")
                     .short("v")
-                    .multiple(true)
-                    .help("Verbosity level"),
+                    .help("Verbosity level (can be called multiple times, e.g. -vv)")
+                    .multiple(true),
             )
             .get_matches();
 
@@ -108,10 +110,10 @@ impl Opts {
 
         let file_conf = file_conf.unwrap_or_default();
 
-        if matches.is_present("no_launched_inherit_stdio") {
-            default.no_launched_inherit_stdio = true;
-        } else if let Some(val) = file_conf.no_launched_inherit_stdio {
-            default.no_launched_inherit_stdio = val;
+        if matches.is_present("inherit_stdio") {
+            default.inherit_stdio = false;
+        } else if let Some(val) = file_conf.inherit_stdio {
+            default.inherit_stdio = val;
         }
 
         if let Some(color) = matches.value_of("highlight_color") {
@@ -150,7 +152,7 @@ impl Opts {
 #[derive(Debug, Deserialize, Default)]
 pub struct FileConf {
     pub highlight_color: Option<String>,
-    pub no_launched_inherit_stdio: Option<bool>,
+    pub inherit_stdio: Option<bool>,
     pub terminal_launcher: Option<String>,
     pub cursor_char: Option<String>,
 }
