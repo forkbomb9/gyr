@@ -1,9 +1,7 @@
 use clap::{App, AppSettings, Arg};
-
+use directories::ProjectDirs;
 use serde::Deserialize;
-
-use std::{env, fs, io};
-
+use std::{env, fs, io, path, process};
 use toml;
 
 #[derive(Debug)]
@@ -73,30 +71,35 @@ impl Opts {
             )
             .arg(
                 Arg::with_name("verbose")
-                .short("v")
-                .multiple(true)
-                .help("Verbosity level"),
+                    .short("v")
+                    .multiple(true)
+                    .help("Verbosity level"),
             )
             .get_matches();
 
-        let config_file =
-            env::var("HOME").expect("No home dir") + "/.config" + "/flauncher" + "/config";
-        let files = vec![matches.value_of("config"), Some(&config_file)];
         let mut file_conf: Option<FileConf> = None;
 
-        for file in files {
+        // Read config file: First command line, then config dir
+        {
+            let mut file = None;
+
+            if let Some(v) = matches.value_of("config") {
+                file = Some(path::PathBuf::from(v));
+            } else if let Some(proj_dirs) = ProjectDirs::from("io", "forkbomb9", "flauncher") {
+                let mut tmp = proj_dirs.config_dir().to_path_buf();
+                tmp.push("config.toml");
+                file = Some(tmp);
+            }
+
             if let Some(f) = file {
-                match FileConf::read(f) {
+                match FileConf::read(&f) {
                     Ok(conf) => {
-                        // @TODO Maybe I shouldn't _always_ set this, only when using
-                        // matches.value_of("config")
                         file_conf = Some(conf);
-                        break;
-                    },
+                    }
                     Err(e) => {
-                        if io::ErrorKind::InvalidData == e.kind() {
-                            println!("Error reading config file {}:\n{}", f, e);
-                            std::process::exit(1);
+                        if io::ErrorKind::NotFound != e.kind() {
+                            println!("Error reading config file {}:\n\t{}", f.display(), e);
+                            process::exit(1);
                         }
                     }
                 }
@@ -153,7 +156,7 @@ pub struct FileConf {
 }
 
 impl FileConf {
-    pub fn read(input_file: &str) -> Result<Self, io::Error> {
+    pub fn read<P: AsRef<path::Path>>(input_file: P) -> Result<Self, io::Error> {
         let config: Self = toml::from_str(&fs::read_to_string(&input_file)?)?;
         Ok(config)
     }
