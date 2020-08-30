@@ -1,19 +1,19 @@
 [package]
-name = "flauncher"
+name = "gyr"
 version = "0.1.0"
 authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
 edition = "2018"
 
 description = "A blazing fast TUI launcher for *BSD and Linux"
 
-repository = "https://gitlab.com/forkbomb9/flauncher"
+repository = "https://gitlab.com/forkbomb9/gyr"
 readme = "README.md"
 keywords = []
 license = "BSD-2-Clause"
 
 [badges]
 # GitLab CI
-gitlab = { repository = "forkbomb9/flauncher"}
+gitlab = { repository = "forkbomb9/gyr"}
 
 [dependencies]
 anyhow = "1.0"

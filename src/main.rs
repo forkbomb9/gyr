@@ -88,7 +88,7 @@ fn main() -> anyhow::Result<()> {
 
             // Text for description
             Paragraph::new(ui.text.iter())
-                .block(block.title("Fantastic Launcher"))
+                .block(block.title("Gyr launcher"))
                 .style(Style::default())
                 .alignment(Alignment::Left)
                 .wrap(true)

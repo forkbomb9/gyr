@@ -1,11 +1,11 @@
-# flauncher
+# Gyr
 
-[![License](https://img.shields.io/crates/l/flauncher?style=flat-square)](https://gitlab.com/forkbomb9/flauncher/-/blob/master/LICENSE)
-[![Latest version](https://img.shields.io/crates/v/flauncher?style=flat-square)](https://crates.io/crates/flauncher)
-[![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/flauncher?style=flat-square)]()
+[![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://gitlab.com/forkbomb9/gyr/-/blob/master/LICENSE)
+[![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
+[![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/gyr?style=flat-square)]()
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-Fantastic Launcher, a _blazing fast_ TUI launcher for *BSD and Linux
+Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 
 ## Table of Contents
 
@@ -23,21 +23,21 @@ But for now, build from source:
 * Install [Rust](https://www.rust-lang.org/learn/get-started)
 * Build:
     ```sh
-    $ git clone https://gitlab.com/forkbomb9/flauncher.git && cd flauncher
+    $ git clone https://gitlab.com/forkbomb9/gyr.git && cd gyr
     $ cargo build --release
     ```
 
-* Copy `target/release/flauncher` to somewhere in your `$PATH`
+* Copy `target/release/gyr` to somewhere in your `$PATH`
 
 ## Usage
 
-Run `flauncher` from a terminal. Scroll through the app list, find some app typing chars, run selected pressing ENTER. Pretty straightforward.
+Run `gyr` from a terminal. Scroll through the app list, find some app typing chars, run selected pressing ENTER. Pretty straightforward.
 Oh, yes: go to the bottom with the left arrow, top with right. Cancel pressing Esc.
 
 It's useful for tiling WMs, e.g. [Sway](https://swaywm.org/) or [i3](https://i3wm.org/)
 
-You can configure some things with cli flags, check `flauncher --help`
-There's also a config file which can be placed in `$HOME/.config/flauncher/config.toml`/`$XDG_DATA_HOME/flauncher/config.toml` ([sample](./config.toml))
+You can configure some things with cli flags, check `gyr --help`
+There's also a config file which can be placed in `$HOME/.config/gyr/config.toml`/`$XDG_DATA_HOME/gyr/config.toml` ([sample](./config.toml))
 
 ## TODO
 

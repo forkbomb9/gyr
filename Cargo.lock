@@ -147,22 +147,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
 
 [[package]]
-name = "flauncher"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "directories",
- "fuzzy-matcher",
- "libc",
- "regex",
- "serde",
- "termion",
- "toml",
- "tui",
-]
-
-[[package]]
 name = "fuzzy-matcher"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -180,6 +164,22 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
+]
+
+[[package]]
+name = "gyr"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "directories",
+ "fuzzy-matcher",
+ "libc",
+ "regex",
+ "serde",
+ "termion",
+ "toml",
+ "tui",
 ]
 
 [[package]]
