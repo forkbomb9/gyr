@@ -2,7 +2,7 @@
 
 mod apps;
 mod cli;
-mod event;
+mod input;
 mod ui;
 use ui::UI;
 
@@ -25,7 +25,7 @@ use tui::style::{Modifier, Style};
 use tui::widgets::{Block, Borders, Paragraph, SelectableList, Text, Widget};
 use tui::Terminal;
 
-use event::{Event, Events};
+use input::InputInit;
 
 fn main() -> anyhow::Result<()> {
     let opts = cli::Opts::new();
@@ -47,17 +47,14 @@ fn main() -> anyhow::Result<()> {
     // Terminal initialization
     let stdout = io::stdout()
         .into_raw_mode()
-        .with_context(|| "Failed to init stdout")?;
+        .context("Failed to init stdout")?;
     let stdout = MouseTerminal::from(stdout);
     let stdout = AlternateScreen::from(stdout);
     let backend = TermionBackend::new(stdout);
-    let mut terminal =
-        Terminal::new(backend).with_context(|| "Failed to start termion::Terminal")?;
-    terminal
-        .hide_cursor()
-        .with_context(|| "Failed to hide cursor")?;
+    let mut terminal = Terminal::new(backend).context("Failed to start termion::Terminal")?;
+    terminal.hide_cursor().context("Failed to hide cursor")?;
 
-    let events = Events::new();
+    let input = InputInit::default().init();
 
     // UI
     let mut ui = UI::new(apps);
@@ -129,49 +126,46 @@ fn main() -> anyhow::Result<()> {
             .render(&mut f, bottom_chunks[1]);
         })?;
 
-        match events.next()? {
-            Event::Input(input) => match input {
-                Key::Esc => {
-                    return Ok(());
+        match input.next()? {
+            Key::Esc => {
+                return Ok(());
+            }
+            Key::Char('\n') => {
+                break;
+            }
+            Key::Char(c) => {
+                ui.query.push(c);
+                ui.update_filter();
+            }
+            Key::Backspace => {
+                ui.query.pop();
+                ui.update_filter();
+            }
+            Key::Left => {
+                ui.selected = Some(0);
+            }
+            Key::Right => {
+                ui.selected = Some(ui.shown.len() - 1);
+            }
+            Key::Down => {
+                if let Some(selected) = ui.selected {
+                    ui.selected = if selected >= ui.shown.len() - 1 {
+                        Some(0)
+                    } else {
+                        Some(selected + 1)
+                    };
                 }
-                Key::Char('\n') => {
-                    break;
+            }
+            Key::Up => {
+                if let Some(selected) = ui.selected {
+                    ui.selected = if selected > 0 {
+                        Some(selected - 1)
+                    } else {
+                        Some(ui.shown.len() - 1)
+                    };
                 }
-                Key::Char(c) => {
-                    ui.query.push(c);
-                    ui.update_filter();
-                }
-                Key::Backspace => {
-                    ui.query.pop();
-                    ui.update_filter();
-                }
-                Key::Left => {
-                    ui.selected = Some(0);
-                }
-                Key::Right => {
-                    ui.selected = Some(ui.shown.len() - 1);
-                }
-                Key::Down => {
-                    if let Some(selected) = ui.selected {
-                        ui.selected = if selected >= ui.shown.len() - 1 {
-                            Some(0)
-                        } else {
-                            Some(selected + 1)
-                        };
-                    }
-                }
-                Key::Up => {
-                    if let Some(selected) = ui.selected {
-                        ui.selected = if selected > 0 {
-                            Some(selected - 1)
-                        } else {
-                            Some(ui.shown.len() - 1)
-                        };
-                    }
-                }
-                _ => {}
-            },
-            Event::Tick => (),
+            }
+            _ => {}
         }
 
         ui.update_info(opts.highlight_color);
