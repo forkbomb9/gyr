@@ -133,13 +133,13 @@ impl Application {
                     let line = line.trim_start_matches("Exec=");
 
                     let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
-                    let mut trimming = line.to_string();
+                    let mut trimmed = line.to_string();
 
                     if let Some(range) = re.find(&line) {
-                        trimming.replace_range(range.start()..range.end(), "");
+                        trimmed.replace_range(range.start()..range.end(), "");
                     }
 
-                    exec = Some(trimming.to_string());
+                    exec = Some(trimmed.to_string());
                 } else if line.starts_with("NoDisplay=") {
                     let line = line.trim_start_matches("NoDisplay=");
                     if line.to_lowercase() == "true" {
@@ -161,12 +161,11 @@ impl Application {
 
         let name = name.unwrap_or_else(|| "Unknown".to_string());
 
-        let exec = if let Some(e) = exec {
-            e
-        } else {
+        if exec.is_none() {
             return Err(anyhow!("No command to run!"));
-        };
+        }
 
+        let exec = exec.unwrap();
         let description = description.unwrap_or_default();
 
         Ok(Application {
@@ -183,18 +182,18 @@ impl Application {
 
 #[derive(Default)]
 pub struct Action {
-    from: String,
     name: String,
+    from: String,
 }
 
 impl Action {
-    fn from(mut self, from: impl Into<String>) -> Self {
-        self.from = from.into();
+    fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
         self
     }
 
-    fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = name.into();
+    fn from(mut self, from: impl Into<String>) -> Self {
+        self.from = from.into();
         self
     }
 }

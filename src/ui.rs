@@ -1,4 +1,4 @@
-use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
+use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 
 use tui::style::{Color, Style};
 use tui::widgets::Text;
@@ -55,7 +55,10 @@ impl<'a> UI<'a> {
                     Style::default().fg(Color::DarkGray),
                 ));
                 if self.verbose > 1 {
-                    self.text.push(Text::raw(format!("\nMatching score: {}", self.shown[selected].score)));
+                    self.text.push(Text::raw(format!(
+                        "\nMatching score: {}",
+                        self.shown[selected].score
+                    )));
                 }
             }
         } else {
@@ -70,7 +73,7 @@ impl<'a> UI<'a> {
                 None => {
                     self.shown[i].score = 0;
                     self.hidden.push(self.shown.remove(i));
-                },
+                }
                 Some(score) => {
                     self.shown[i].score = score;
                     i += 1;
@@ -81,8 +84,8 @@ impl<'a> UI<'a> {
         i = 0;
         while i != self.hidden.len() {
             if let Some(score) = self.matcher.fuzzy_match(&self.hidden[i].name, &self.query) {
-                    self.hidden[i].score = score;
-                    self.shown.push(self.hidden.remove(i));
+                self.hidden[i].score = score;
+                self.shown.push(self.hidden.remove(i));
             } else {
                 i += 1;
             }

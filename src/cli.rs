@@ -54,7 +54,9 @@ impl Opts {
                 Arg::with_name("inherit_stdio")
                     .short("n")
                     .long("dont-inherit-stdio")
-                    .help("The launched app won't inherit the stdio (i.e. it won't print anything)"),
+                    .help(
+                        "The launched app won't inherit the stdio (i.e. it won't print anything)",
+                    ),
             )
             .arg(
                 Arg::with_name("terminal_launcher")
@@ -87,7 +89,9 @@ impl Opts {
 
             if let Some(v) = matches.value_of("config") {
                 file = Some(path::PathBuf::from(v));
-            } else if let Some(proj_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
+            } else if let Some(proj_dirs) =
+                ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME"))
+            {
                 let mut tmp = proj_dirs.config_dir().to_path_buf();
                 tmp.push("config.toml");
                 file = Some(tmp);

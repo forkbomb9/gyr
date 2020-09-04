@@ -108,7 +108,10 @@ fn main() -> anyhow::Result<()> {
             Paragraph::new(
                 [
                     Text::raw("("),
-                    Text::styled((ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(), Style::default().fg(opts.highlight_color)),
+                    Text::styled(
+                        (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
+                        Style::default().fg(opts.highlight_color),
+                    ),
                     Text::raw("/"),
                     Text::raw(ui.shown.len().to_string()),
                     Text::raw(") "),
