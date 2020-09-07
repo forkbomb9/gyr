@@ -81,11 +81,11 @@ impl convert::AsRef<str> for Application {
 }
 
 impl Application {
-    pub fn parse<T: Into<String>>(
+    pub fn parse<T: AsRef<str>>(
         contents: T,
         action: Option<Action>,
     ) -> anyhow::Result<Application> {
-        let contents = contents.into();
+        let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {
             if a.name == "" {
