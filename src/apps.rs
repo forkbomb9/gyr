@@ -159,7 +159,7 @@ impl Application {
             }
         }
 
-        let name = name.unwrap_or_else(|| "Unknown".to_string());
+        let name = name.unwrap_or("Unknown".to_string());
 
         if exec.is_none() {
             return Err(anyhow!("No command to run!"));
