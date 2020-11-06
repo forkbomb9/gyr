@@ -6,7 +6,7 @@ mod input;
 mod ui;
 use ui::UI;
 
-use anyhow::Context;
+use input::InputInit;
 
 use std::env;
 use std::io;
@@ -14,18 +14,17 @@ use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
 
+use anyhow::Context;
 use termion::event::Key;
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
 use termion::screen::AlternateScreen;
-
 use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Modifier, Style};
-use tui::widgets::{Block, Borders, Paragraph, SelectableList, Text, Widget};
+use tui::text::{Span, Spans};
+use tui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
 use tui::Terminal;
-
-use input::InputInit;
 
 fn main() -> anyhow::Result<()> {
     let opts = cli::Opts::new();
@@ -66,17 +65,18 @@ fn main() -> anyhow::Result<()> {
     ui.update_info(opts.highlight_color);
 
     loop {
-        terminal.draw(|mut f| {
+        terminal.draw(|f| {
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Length(8), Constraint::Min(2)].as_ref())
                 .split(f.size());
 
-            let style = Style::default();
-
-            let block = Block::default()
-                .borders(Borders::ALL)
-                .title_style(Style::default().modifier(Modifier::BOLD));
+            let create_block = |title| {
+                Block::default().borders(Borders::ALL).title(Span::styled(
+                    title,
+                    Style::default().add_modifier(Modifier::BOLD),
+                ))
+            };
 
             let bottom_chunks = Layout::default()
                 .direction(Direction::Vertical)
@@ -84,46 +84,57 @@ fn main() -> anyhow::Result<()> {
                 .split(chunks[1]);
 
             // Text for description
-            Paragraph::new(ui.text.iter())
-                .block(block.title("Gyr launcher"))
+            let description = Paragraph::new(ui.text.clone())
+                .block(create_block("Gyr launcher"))
                 .style(Style::default())
-                .alignment(Alignment::Left)
-                .wrap(true)
-                .render(&mut f, chunks[0]);
+                .alignment(Alignment::Left);
+
+            f.render_widget(description, chunks[0]);
 
             // App list
-            SelectableList::default()
-                .block(block.title("Apps").borders(Borders::ALL))
-                .items(&ui.shown)
-                .select(ui.selected)
-                .style(style)
-                .highlight_style(style.fg(opts.highlight_color).modifier(Modifier::BOLD))
-                .highlight_symbol(">")
-                .render(&mut f, bottom_chunks[0]);
+            let mut state = ListState::default();
+
+            let apps = ui.shown.clone();
+            let apps = apps
+                .iter()
+                .map(|app| ListItem::from(app))
+                .collect::<Vec<ListItem>>();
+
+            let list = List::new(apps)
+                .block(create_block("Apps"))
+                .style(Style::default())
+                .highlight_style(
+                    Style::default()
+                        .fg(opts.highlight_color)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .highlight_symbol("> ");
+
+            state.select(ui.selected);
+
+            f.render_stateful_widget(list, bottom_chunks[0], &mut state);
 
             // Query
-            Paragraph::new(
-                [
-                    Text::raw("("),
-                    Text::styled(
-                        (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
-                        Style::default().fg(opts.highlight_color),
-                    ),
-                    Text::raw("/"),
-                    Text::raw(ui.shown.len().to_string()),
-                    Text::raw(") "),
-                    Text::styled(">", Style::default().fg(opts.highlight_color)),
-                    Text::raw("> "),
-                    Text::raw(&ui.query),
-                    Text::raw(&opts.cursor_char),
-                ]
-                .iter(),
-            )
+            let query = Paragraph::new(Spans::from(vec![
+                Span::raw("("),
+                Span::styled(
+                    (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
+                    Style::default().fg(opts.highlight_color),
+                ),
+                Span::raw("/"),
+                Span::raw(ui.shown.len().to_string()),
+                Span::raw(") "),
+                Span::styled(">", Style::default().fg(opts.highlight_color)),
+                Span::raw("> "),
+                Span::raw(&ui.query),
+                Span::raw(&opts.cursor_char),
+            ]))
             .block(Block::default().borders(Borders::ALL))
             .style(Style::default())
             .alignment(Alignment::Left)
-            .wrap(true)
-            .render(&mut f, bottom_chunks[1]);
+            .wrap(tui::widgets::Wrap { trim: false });
+
+            f.render_widget(query, bottom_chunks[1])
         })?;
 
         match input.next()? {

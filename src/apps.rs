@@ -6,6 +6,7 @@ use std::fs;
 use std::path;
 
 use regex::Regex;
+use tui::widgets::ListItem;
 
 pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Application>> {
     let mut apps = Vec::new();
@@ -77,6 +78,18 @@ impl fmt::Display for Application {
 impl convert::AsRef<str> for Application {
     fn as_ref(&self) -> &str {
         self.name.as_ref()
+    }
+}
+
+impl<'a> From<Application> for ListItem<'a> {
+    fn from(app: Application) -> ListItem<'a> {
+        ListItem::new(app.name)
+    }
+}
+
+impl<'a> From<&'a Application> for ListItem<'a> {
+    fn from(app: &'a Application) -> ListItem<'a> {
+        ListItem::new(app.name.clone())
     }
 }
 

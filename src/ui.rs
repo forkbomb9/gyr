@@ -1,7 +1,6 @@
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-
 use tui::style::{Color, Style};
-use tui::widgets::Text;
+use tui::text::{Span, Spans, Text};
 
 use super::apps;
 
@@ -9,7 +8,7 @@ pub struct UI<'a> {
     pub hidden: Vec<apps::Application>,
     pub shown: Vec<apps::Application>,
     pub selected: Option<usize>,
-    pub text: Vec<Text<'a>>,
+    pub text: Vec<Spans<'a>>,
     pub query: String,
     pub log: Vec<Text<'a>>,
     pub verbose: u64,
@@ -38,27 +37,40 @@ impl<'a> UI<'a> {
     pub fn update_info(&mut self, color: Color) {
         if let Some(selected) = self.selected {
             self.text = vec![
-                Text::styled(
-                    format!("{}\n\n", &self.shown[selected].name),
+                Spans::from(Span::styled(
+                    format!("{}", &self.shown[selected].name),
                     Style::default().fg(color),
-                ),
-                Text::raw(format!("{}\n", &self.shown[selected].description)),
+                )),
+                Spans::default(),
+                Spans::from(Span::raw(format!("{}", &self.shown[selected].description))),
             ];
             if self.verbose > 0 {
-                self.text.push(if self.shown[selected].terminal_exec {
-                    Text::raw("\nExec (terminal): ")
+                let mut text = vec![];
+
+                text.push(if self.shown[selected].terminal_exec {
+                    Span::raw("Exec (terminal): ")
                 } else {
-                    Text::raw("\nExec: ")
+                    Span::raw("Exec: ")
                 });
-                self.text.push(Text::styled(
+
+                text.push(Span::styled(
                     self.shown[selected].exec.to_string(),
                     Style::default().fg(Color::DarkGray),
                 ));
+
+                // Newline
+                self.text.push(Spans::default());
+
+                self.text.push(Spans::from(text));
+
                 if self.verbose > 1 {
-                    self.text.push(Text::raw(format!(
+                    // Newline
+                    self.text.push(Spans::default());
+
+                    self.text.push(Spans::from(Span::raw(format!(
                         "\nMatching score: {}",
                         self.shown[selected].score
-                    )));
+                    ))));
                 }
             }
         } else {
