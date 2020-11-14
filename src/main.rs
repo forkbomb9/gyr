@@ -2,11 +2,12 @@
 
 mod apps;
 mod cli;
+#[allow(dead_code)]
 mod input;
 mod ui;
 use ui::UI;
 
-use input::InputInit;
+use input::{Event, Input};
 
 use std::env;
 use std::io;
@@ -53,7 +54,7 @@ fn main() -> anyhow::Result<()> {
     let mut terminal = Terminal::new(backend).context("Failed to start termion::Terminal")?;
     terminal.hide_cursor().context("Failed to hide cursor")?;
 
-    let input = InputInit::default().init();
+    let input = Input::new();
 
     // UI
     let mut ui = UI::new(apps);
@@ -137,49 +138,51 @@ fn main() -> anyhow::Result<()> {
             f.render_widget(query, bottom_chunks[1])
         })?;
 
-        match input.next()? {
-            Key::Esc => {
-                return Ok(());
-            }
-            Key::Char('\n') => {
-                break;
-            }
-            Key::Char(c) => {
-                ui.query.push(c);
-                ui.update_filter();
-            }
-            Key::Backspace => {
-                ui.query.pop();
-                ui.update_filter();
-            }
-            Key::Left => {
-                ui.selected = Some(0);
-            }
-            Key::Right => {
-                ui.selected = Some(ui.shown.len() - 1);
-            }
-            Key::Down => {
-                if let Some(selected) = ui.selected {
-                    ui.selected = if selected >= ui.shown.len() - 1 {
-                        Some(0)
-                    } else {
-                        Some(selected + 1)
-                    };
+        if let Event::Input(key) = input.next()? {
+            match key {
+                Key::Esc => {
+                    return Ok(());
                 }
-            }
-            Key::Up => {
-                if let Some(selected) = ui.selected {
-                    ui.selected = if selected > 0 {
-                        Some(selected - 1)
-                    } else {
-                        Some(ui.shown.len() - 1)
-                    };
+                Key::Char('\n') => {
+                    break;
                 }
+                Key::Char(c) => {
+                    ui.query.push(c);
+                    ui.update_filter();
+                }
+                Key::Backspace => {
+                    ui.query.pop();
+                    ui.update_filter();
+                }
+                Key::Left => {
+                    ui.selected = Some(0);
+                }
+                Key::Right => {
+                    ui.selected = Some(ui.shown.len() - 1);
+                }
+                Key::Down => {
+                    if let Some(selected) = ui.selected {
+                        ui.selected = if selected >= ui.shown.len() - 1 {
+                            Some(0)
+                        } else {
+                            Some(selected + 1)
+                        };
+                    }
+                }
+                Key::Up => {
+                    if let Some(selected) = ui.selected {
+                        ui.selected = if selected > 0 {
+                            Some(selected - 1)
+                        } else {
+                            Some(ui.shown.len() - 1)
+                        };
+                    }
+                }
+                _ => {}
             }
-            _ => {}
-        }
 
-        ui.update_info(opts.highlight_color);
+            ui.update_info(opts.highlight_color);
+        }
     }
 
     if let Some(selected) = ui.selected {

@@ -1,6 +1,7 @@
 use std::io;
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
 use termion::event::Key;
 use termion::input::TermRead;
@@ -13,61 +14,92 @@ use termion::input::TermRead;
 /// # Example
 /// ```rust
 /// // Build a default `Input` (Esc ends the handling thread)
-/// let input = InputInit::default().init();
+/// let input = Config::default().init();
 /// // Customize the exit key
-/// let input = InputInit {
+/// let input = Config {
 ///     exit_key: Key::Backspace,
 ///     ..Default::default()
 /// }.init();
-/// // Like before but with less code
-/// let input = Input::new(Key::Backspace);
 /// ```
 #[non_exhaustive]
-pub struct InputInit {
+#[derive(Debug, Clone, Copy)]
+pub struct Config {
     pub exit_key: Key,
+    pub tick_rate: Duration,
 }
 
-impl Default for InputInit {
+impl Default for Config {
     fn default() -> Self {
-        Self { exit_key: Key::Esc }
+        Self {
+            exit_key: Key::Esc,
+            tick_rate: Duration::from_millis(250),
+        }
     }
 }
 
-impl InputInit {
+impl Config {
     /// Creates a new `Input` with the configuration in `Self`
     pub fn init(self) -> Input {
-        Input::new(self.exit_key)
+        Input::with_config(self)
     }
+}
+
+pub enum Event<I> {
+    Input(I),
+    Tick,
 }
 
 /// Small input handler. Uses Termion as the backend.
-pub struct Input(mpsc::Receiver<Key>);
+pub struct Input {
+    rx: mpsc::Receiver<Event<Key>>,
+    input_handle: thread::JoinHandle<()>,
+    tick_handle: thread::JoinHandle<()>,
+}
 
 impl Input {
-    /// Create a new input handler. When `exit_key` is pressed, the internal thread handling input
-    /// exits
-    pub fn new(exit_key: Key) -> Self {
+    pub fn new() -> Self {
+        Self::with_config(Config::default())
+    }
+
+    pub fn with_config(config: Config) -> Self {
         let (tx, rx) = mpsc::channel();
 
-        thread::spawn(move || {
-            let stdin = io::stdin();
-            for evt in stdin.keys() {
-                if let Ok(key) = evt {
-                    if tx.send(key).is_err() {
-                        return;
-                    }
-                    if key == exit_key {
-                        return;
+        let input_handle = {
+            let tx = tx.clone();
+
+            thread::spawn(move || {
+                let stdin = io::stdin();
+                for evt in stdin.keys() {
+                    if let Ok(key) = evt {
+                        if tx.send(Event::Input(key)).is_err() {
+                            return;
+                        }
+                        if key == config.exit_key {
+                            return;
+                        }
                     }
                 }
-            }
-        });
+            })
+        };
 
-        Self(rx)
+        let tick_handle = {
+            thread::spawn(move || loop {
+                if tx.send(Event::Tick).is_err() {
+                    break;
+                }
+                thread::sleep(config.tick_rate);
+            })
+        };
+
+        Self {
+            rx,
+            input_handle,
+            tick_handle,
+        }
     }
 
     /// Next key pressed by user.
-    pub fn next(&self) -> Result<Key, mpsc::RecvError> {
-        self.0.recv()
+    pub fn next(&self) -> Result<Event<Key>, mpsc::RecvError> {
+        self.rx.recv()
     }
 }
