@@ -25,4 +25,4 @@ regex = "1"
 serde = { version = "1", features = ["derive"] }
 termion = "1.5"
 toml = "0.5"
-tui = "0.12"
+tui = "0.13"
