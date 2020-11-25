@@ -24,7 +24,7 @@ use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Modifier, Style};
 use tui::text::{Span, Spans};
-use tui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
+use tui::widgets::{Block, Borders, BorderType, List, ListItem, ListState, Paragraph, Wrap};
 use tui::Terminal;
 
 fn main() -> anyhow::Result<()> {
@@ -73,10 +73,15 @@ fn main() -> anyhow::Result<()> {
                 .split(f.size());
 
             let create_block = |title| {
-                Block::default().borders(Borders::ALL).title(Span::styled(
-                    title,
-                    Style::default().add_modifier(Modifier::BOLD),
-                ))
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title(
+                        Span::styled(
+                            title,
+                            Style::default().add_modifier(Modifier::BOLD),
+                        )
+                    )
+                    .border_type(BorderType::Rounded)
             };
 
             let bottom_chunks = Layout::default()
@@ -88,6 +93,7 @@ fn main() -> anyhow::Result<()> {
             let description = Paragraph::new(ui.text.clone())
                 .block(create_block("Gyr launcher"))
                 .style(Style::default())
+                .wrap(Wrap { trim: false })
                 .alignment(Alignment::Left);
 
             f.render_widget(description, chunks[0]);
@@ -130,7 +136,7 @@ fn main() -> anyhow::Result<()> {
                 Span::raw(&ui.query),
                 Span::raw(&opts.cursor_char),
             ]))
-            .block(Block::default().borders(Borders::ALL))
+            .block(create_block(""))
             .style(Style::default())
             .alignment(Alignment::Left)
             .wrap(tui::widgets::Wrap { trim: false });
