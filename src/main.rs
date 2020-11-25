@@ -194,7 +194,7 @@ fn main() -> anyhow::Result<()> {
     if let Some(selected) = ui.selected {
         let app_to_run = &ui.shown[selected];
 
-        let commands = app_to_run.exec.split(' ').collect::<Vec<&str>>();
+        let commands = shell_words::split(&app_to_run.exec)?;
 
         let mut exec;
 
