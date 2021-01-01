@@ -26,4 +26,4 @@ serde = { version = "1", features = ["derive"] }
 shell-words = "1.0"
 termion = "1.5"
 toml = "0.5"
-tui = "0.13"
+tui = "0.14"
