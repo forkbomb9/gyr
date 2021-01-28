@@ -16,7 +16,7 @@ license = "BSD-2-Clause"
 gitlab = { repository = "forkbomb9/gyr"}
 
 [dependencies]
-anyhow = "1.0"
+eyre = "0.6"
 clap = "2.33"
 directories = "3.0"
 fuzzy-matcher = "0.3"

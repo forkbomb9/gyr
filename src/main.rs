@@ -15,7 +15,7 @@ use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
 
-use anyhow::Context;
+use eyre::WrapErr;
 use termion::event::Key;
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
@@ -27,7 +27,7 @@ use tui::text::{Span, Spans};
 use tui::widgets::{Block, Borders, BorderType, List, ListItem, ListState, Paragraph, Wrap};
 use tui::Terminal;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> eyre::Result<()> {
     let opts = cli::Opts::new();
 
     let mut dirs: Vec<path::PathBuf> = vec![];
@@ -47,12 +47,12 @@ fn main() -> anyhow::Result<()> {
     // Terminal initialization
     let stdout = io::stdout()
         .into_raw_mode()
-        .context("Failed to init stdout")?;
+        .wrap_err("Failed to init stdout")?;
     let stdout = MouseTerminal::from(stdout);
     let stdout = AlternateScreen::from(stdout);
     let backend = TermionBackend::new(stdout);
-    let mut terminal = Terminal::new(backend).context("Failed to start termion::Terminal")?;
-    terminal.hide_cursor().context("Failed to hide cursor")?;
+    let mut terminal = Terminal::new(backend).wrap_err("Failed to start termion::Terminal")?;
+    terminal.hide_cursor().wrap_err("Failed to hide cursor")?;
 
     let input = Input::new();
 
@@ -199,7 +199,7 @@ fn main() -> anyhow::Result<()> {
         let mut exec;
 
         if let Some(path) = &app_to_run.path {
-            env::set_current_dir(path::PathBuf::from(path)).with_context(|| {
+            env::set_current_dir(path::PathBuf::from(path)).wrap_err_with(|| {
                 format!("Failed to switch to {} when starting {}", path, app_to_run)
             })?;
         }
@@ -239,10 +239,10 @@ fn main() -> anyhow::Result<()> {
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())
                 .spawn()
-                .with_context(|| format!("Failed to run {:?}", exec))?;
+                .wrap_err_with(|| format!("Failed to run {:?}", exec))?;
         } else {
             exec.spawn()
-                .with_context(|| format!("Failed to run {:?}", exec))?;
+                .wrap_err_with(|| format!("Failed to run {:?}", exec))?;
         }
     }
 

@@ -19,12 +19,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.37"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee67c11feeac938fae061b232e38e0b6d94f97a9df10e6271319325ac4c56a86"
-
-[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -141,6 +135,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "eyre"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "221239d1d5ea86bf5d6f91c9d6bc3646ffe471b08ff9b0f91c44f115ac969d2b"
+dependencies = [
+ "indenter",
+ "once_cell",
+]
+
+[[package]]
 name = "fuzzy-matcher"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -164,9 +168,9 @@ dependencies = [
 name = "gyr"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "clap",
  "directories",
+ "eyre",
  "fuzzy-matcher",
  "libc",
  "regex",
@@ -185,6 +189,12 @@ checksum = "5aca5565f760fb5b220e499d72710ed156fdb74e631659e99377d9ebfbd13ae8"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "indenter"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4d5eb2e114fec2b7fe0fadc22888ad2658789bb7acac4dbee9cf8389f971ec8"
 
 [[package]]
 name = "lazy_static"
@@ -209,6 +219,12 @@ name = "numtoa"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8f8bdf33df195859076e54ab11ee78a1b208382d3a26ec40d142ffc1ecc49ef"
+
+[[package]]
+name = "once_cell"
+version = "1.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13bd41f508810a131401606d54ac32a467c97172d74ba7662562ebba5ad07fa0"
 
 [[package]]
 name = "proc-macro2"

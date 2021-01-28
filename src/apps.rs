@@ -1,24 +1,23 @@
-use anyhow::{anyhow, Context};
-
 use std::convert;
 use std::fmt;
 use std::fs;
 use std::path;
 
+use eyre::{eyre, WrapErr};
 use regex::Regex;
 use tui::widgets::ListItem;
 
-pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> anyhow::Result<Vec<Application>> {
+pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> eyre::Result<Vec<Application>> {
     let mut apps = Vec::new();
 
     for dir in dirs {
         let dir = dir.into();
         let files =
-            fs::read_dir(&dir).with_context(|| format!("Failed to open dir {}", dir.display()))?;
+            fs::read_dir(&dir).wrap_err_with(|| format!("Failed to open dir {}", dir.display()))?;
 
         for file in files {
             if let Ok(file) = file {
-                let contents = fs::read_to_string(file.path()).with_context(|| {
+                let contents = fs::read_to_string(file.path()).wrap_err_with(|| {
                     format!("Failed to read contents from {}", file.path().display())
                 })?;
                 if let Ok(app) = Application::parse(&contents, None) {
@@ -97,12 +96,12 @@ impl Application {
     pub fn parse<T: AsRef<str>>(
         contents: T,
         action: Option<Action>,
-    ) -> anyhow::Result<Application> {
+    ) -> eyre::Result<Application> {
         let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {
             if a.name == "" {
-                return Err(anyhow!("Action is empty"));
+                return Err(eyre!("Action is empty"));
             }
             format!("[Desktop Action {}]", a.name)
         } else {
@@ -156,7 +155,7 @@ impl Application {
                 } else if line.starts_with("NoDisplay=") {
                     let line = line.trim_start_matches("NoDisplay=");
                     if line.to_lowercase() == "true" {
-                        return Err(anyhow!("App is hidden"));
+                        return Err(eyre!("App is hidden"));
                     }
                 } else if line.starts_with("Path=") && path.is_none() {
                     let line = line.trim_start_matches("Path=");
@@ -175,7 +174,7 @@ impl Application {
         let name = name.unwrap_or("Unknown".to_string());
 
         if exec.is_none() {
-            return Err(anyhow!("No command to run!"));
+            return Err(eyre!("No command to run!"));
         }
 
         let exec = exec.unwrap();
