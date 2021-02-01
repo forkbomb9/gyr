@@ -10,6 +10,7 @@ use ui::UI;
 use input::{Event, Input};
 
 use std::env;
+use std::fs;
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::path;
@@ -41,8 +42,15 @@ fn main() -> eyre::Result<()> {
             dirs.push(path);
         }
     }
+    let mut cache_dir = path::PathBuf::from(env!("HOME").to_owned() + "/.local/share/gyr");
+    if !cache_dir.exists() {
+        fs::create_dir(&cache_dir)?;
+    }
+    cache_dir.set_file_name("hist_db");
 
-    let apps = apps::read(dirs)?;
+    let db: sled::Db = sled::open(cache_dir)?;
+
+    let apps = apps::read(dirs, &db)?;
 
     // Terminal initialization
     let stdout = io::stdout()
@@ -244,7 +252,33 @@ fn main() -> eyre::Result<()> {
             exec.spawn()
                 .wrap_err_with(|| format!("Failed to run {:?}", exec))?;
         }
+
+        {
+            let value = app_to_run.history + 1;
+            let packed = bytes::pack(value);
+            db.insert(&app_to_run.name.as_bytes(), &packed).unwrap();
+        }
     }
 
     Ok(())
+}
+
+mod bytes {
+    // TODO: Report errors
+    pub fn unpack(buffer: &[u8]) -> u64 {
+        assert!(buffer.len() >= 8);
+        let mut data = 0u64;
+        for i in 0..8 {
+            data = (buffer[i] as u64) << (i * 8) | data;
+        }
+        data
+    }
+
+    pub fn pack(data: u64) -> [u8; 8] {
+        let mut buffer = [0u8; 8];
+        for i in 0..8 {
+            buffer[i] = ((data >> (i * 8)) & 0xFF) as u8;
+        }
+        buffer
+    }
 }

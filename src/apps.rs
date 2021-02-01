@@ -7,7 +7,7 @@ use eyre::{eyre, WrapErr};
 use regex::Regex;
 use tui::widgets::ListItem;
 
-pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> eyre::Result<Vec<Application>> {
+pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<Application>> {
     let mut apps = Vec::new();
 
     for dir in dirs {
@@ -35,35 +35,51 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>) -> eyre::Result<Vec<Application
         }
     }
 
+    for app in apps.iter_mut() {
+        if let Some(packed) = db.get(app.name.as_bytes())? {
+            let unpacked = super::bytes::unpack(packed.as_ref());
+            app.history = unpacked;
+        }
+    }
+
     apps.sort();
 
     Ok(apps)
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Application {
-    // Matching score, first so that we sort by score instead of name
-    pub score: i64,
     pub name: String,
     pub exec: String,
     pub description: String,
     pub terminal_exec: bool,
     pub path: Option<String>,
+    pub score: i64,
+    pub history: u64,
+
     // This is not pub because I use it only on this file
     #[doc(hidden)]
     actions: Option<Vec<String>>,
 }
 
-// NOTE: Custom Ord implementation.
-// We want to sort by score first, then name, but the score sorts from highest to lowest.
+// Custom Ord implementation, sorts by history then score then alphabetically
 impl Ord for Application {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.score
-            .cmp(&other.score)
-            // Reverse score, sort highest to lowest
-            .reverse()
-            // And then compare the name too
+        // Sort by highest to lowest history
+        self.history.cmp(&other.history).reverse()
+            .then(
+                // Within that, sort by score, highest to lowest
+                self.score.cmp(&other.score).reverse()
+            )
+            // Finally, sort alphabetically
             .then(self.name.cmp(&other.name))
+    }
+}
+
+// Custom PartialOrd, uses our custom Ord
+impl PartialOrd for Application {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(&other))
     }
 }
 
@@ -182,6 +198,7 @@ impl Application {
 
         Ok(Application {
             score: 0,
+            history: 0,
             name,
             exec,
             description,
