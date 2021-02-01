@@ -41,10 +41,11 @@ impl<'a> UI<'a> {
                     format!("{}", &self.shown[selected].name),
                     Style::default().fg(color),
                 )),
-                Spans::default(),
                 Spans::from(Span::raw(format!("{}", &self.shown[selected].description))),
             ];
             if self.verbose > 0 {
+                self.text.push(Spans::default());
+
                 let mut text = vec![];
 
                 text.push(if self.shown[selected].terminal_exec {
@@ -55,17 +56,13 @@ impl<'a> UI<'a> {
 
                 text.push(Span::styled(
                     self.shown[selected].exec.to_string(),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default(),
                 ));
-
-                // Newline
-                self.text.push(Spans::default());
 
                 self.text.push(Spans::from(text));
 
                 if self.verbose > 1 {
-                    // Newline
-                    self.text.push(Spans::default());
+                    self.text.push(Spans::from(Span::raw(format!("Times run: {}", &self.shown[selected].history))));
 
                     self.text.push(Spans::from(Span::raw(format!(
                         "\nMatching score: {}",
