@@ -10,12 +10,13 @@ use ui::UI;
 use input::{Event, Input};
 
 use std::env;
-use std::fs;
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
 
+use directories::ProjectDirs;
+use eyre::eyre;
 use eyre::WrapErr;
 use termion::event::Key;
 use termion::input::MouseTerminal;
@@ -31,24 +32,39 @@ use tui::Terminal;
 fn main() -> eyre::Result<()> {
     let opts = cli::Opts::new();
 
+    // Directories to look for applications
     let mut dirs: Vec<path::PathBuf> = vec![];
-    for dir in &[
-        "/usr/share/applications".to_string(),
-        "/usr/local/share/applications".to_string(),
-        env!("HOME").to_string() + "/.local/share/applications",
-    ] {
-        let path = path::PathBuf::from(dir);
-        if path.exists() {
-            dirs.push(path);
+    for data_dir in [
+        // Data directories
+        path::PathBuf::from("/usr/share"),
+        path::PathBuf::from("/usr/local/share"),
+        dirs::data_local_dir()
+            .ok_or(eyre!("failed to get local data dir"))?
+    ].iter_mut() {
+        // Add `/applications`
+        data_dir.push("applications");
+        if data_dir.exists() {
+            dirs.push(data_dir.to_path_buf());
         }
     }
-    let mut cache_dir = path::PathBuf::from(env!("HOME").to_owned() + "/.local/share/gyr");
-    if !cache_dir.exists() {
-        fs::create_dir(&cache_dir)?;
-    }
-    cache_dir.set_file_name("hist_db");
 
-    let db: sled::Db = sled::open(cache_dir)?;
+    let db: sled::Db;
+
+    // Open sled database
+    if let Some(project_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
+        let data_dir = project_dirs.data_local_dir().to_path_buf();
+
+        if !data_dir.exists() {
+            return Err(eyre::eyre!("project data dir doesn't exist: {}", data_dir.display()));
+        }
+
+        let mut hist_db = data_dir.clone();
+        hist_db.set_file_name("hist_db");
+
+        db = sled::open(hist_db)?;
+    } else {
+        return Err(eyre::eyre!("can't find data dir for {}, is your system broken?", env!("CARGO_PKG_NAME")))
+    };
 
     let apps = apps::read(dirs, &db)?;
 

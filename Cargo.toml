@@ -19,6 +19,7 @@ gitlab = { repository = "forkbomb9/gyr"}
 eyre = "0.6"
 clap = "2.33"
 directories = "3.0"
+dirs = "3.0"
 fuzzy-matcher = "0.3"
 libc = "0.2"
 regex = "1"
