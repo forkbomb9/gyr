@@ -1,35 +1,76 @@
 use std::convert;
 use std::fmt;
-use std::fs;
+use std::fs::{self, DirEntry};
 use std::path;
 
 use eyre::{eyre, WrapErr};
 use regex::Regex;
 use tui::widgets::ListItem;
 
+// Visit a directory, reading only the files. If another directyr is found, it'll be recursed.
+// This function doesn't return anything, but prints errors when reading files and directories to
+// stderr
+fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
+    if dir.is_dir() {
+        match fs::read_dir(dir) {
+            Ok(ok_dir) => for entry in ok_dir {
+                match entry {
+                    Ok(entry) => {
+                        let path = entry.path();
+                        if path.is_dir() {
+                            visit_dirs(&path, cb);
+                        } else {
+                            cb(&entry);
+                        }
+                    },
+                    Err(error) => {
+                        eprintln!("Failed to open file {}", error);
+                    }
+                }
+            }
+            Err(error) => {
+                eprintln!("Failed to open directory {}: {}", dir.display(), error);
+            }
+        }
+    }
+}
+
 pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<Application>> {
     let mut apps = Vec::new();
 
     for dir in dirs {
         let dir = dir.into();
-        let files =
-            fs::read_dir(&dir).wrap_err_with(|| format!("Failed to open dir {}", dir.display()))?;
 
-        for file in files {
-            if let Ok(file) = file {
-                let contents = fs::read_to_string(file.path()).wrap_err_with(|| {
-                    format!("Failed to read contents from {}", file.path().display())
-                })?;
-                if let Ok(app) = Application::parse(&contents, None) {
-                    if let Some(actions) = &app.actions {
-                        for action in actions {
-                            let ac = Action::default().name(action).from(app.name.clone());
-                            if let Ok(a) = Application::parse(&contents, Some(ac)) {
-                                apps.push(a);
+        let mut files: Vec<path::PathBuf> = vec![];
+
+        visit_dirs(&dir, &mut |entry| {
+            files.push(entry.path());
+        });
+
+        for file in &files {
+            let contents = fs::read_to_string(file).wrap_err_with(|| {
+                format!("Failed to read contents from {}", file.display())
+            });
+            match contents {
+                Ok(contents) => {
+                    if let Ok(app) = Application::parse(&contents, None) {
+                        if let Some(actions) = &app.actions {
+                            for action in actions {
+                                let ac = Action::default().name(action).from(app.name.clone());
+                                if let Ok(a) = Application::parse(&contents, Some(ac)) {
+                                    apps.push(a);
+                                }
                             }
                         }
+                        apps.push(app);
                     }
-                    apps.push(app);
+                }
+                Err(error) => {
+                    if let Some(source) = error.source() {
+                        eprintln!("[ERROR]: {}: {}", error, source);
+                    } else {
+                        eprintln!("[ERROR]: {}", error);
+                    }
                 }
             }
         }
