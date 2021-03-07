@@ -39,6 +39,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
         if let Some(packed) = db.get(app.name.as_bytes())? {
             let unpacked = super::bytes::unpack(packed.as_ref());
             app.history = unpacked;
+            app.score += (unpacked as i64) * 2;
         }
     }
 
@@ -65,13 +66,9 @@ pub struct Application {
 // Custom Ord implementation, sorts by history then score then alphabetically
 impl Ord for Application {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Sort by highest to lowest history
-        self.history.cmp(&other.history).reverse()
-            .then(
-                // Within that, sort by score, highest to lowest
-                self.score.cmp(&other.score).reverse()
-            )
-            // Finally, sort alphabetically
+        // Sort by score, highest to lowest
+        self.score.cmp(&other.score).reverse()
+            // Then sort alphabetically
             .then(self.name.cmp(&other.name))
     }
 }
