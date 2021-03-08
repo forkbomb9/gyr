@@ -1,4 +1,4 @@
-use std::convert;
+use std::convert::{AsRef, TryInto};
 use std::fmt;
 use std::fs::{self, DirEntry};
 use std::path;
@@ -78,7 +78,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
 
     for app in apps.iter_mut() {
         if let Some(packed) = db.get(app.name.as_bytes())? {
-            let unpacked = super::bytes::unpack(packed.as_ref());
+            let unpacked = super::bytes::unpack(packed.as_ref().try_into().expect("Invalid data stored in database"));
             app.history = unpacked;
             app.score += (unpacked as i64) * 2;
         }
@@ -128,7 +128,7 @@ impl fmt::Display for Application {
 }
 
 // This is needed for the SelectableList widget.
-impl convert::AsRef<str> for Application {
+impl AsRef<str> for Application {
     fn as_ref(&self) -> &str {
         self.name.as_ref()
     }

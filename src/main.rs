@@ -280,21 +280,29 @@ fn main() -> eyre::Result<()> {
 }
 
 mod bytes {
-    // TODO: Report errors
-    pub fn unpack(buffer: &[u8]) -> u64 {
-        assert!(buffer.len() >= 8);
+    pub const fn unpack(buffer: [u8; 8]) -> u64 {
         let mut data = 0u64;
-        for i in 0..8 {
-            data = (buffer[i] as u64) << (i * 8) | data;
-        }
+        data |= buffer[0] as u64;
+        data |= (buffer[1] as u64) << 8;
+        data |= (buffer[2] as u64) << 16;
+        data |= (buffer[3] as u64) << 24;
+        data |= (buffer[4] as u64) << 32;
+        data |= (buffer[5] as u64) << 40;
+        data |= (buffer[6] as u64) << 48;
+        data |= (buffer[7] as u64) << 56;
         data
     }
 
-    pub fn pack(data: u64) -> [u8; 8] {
+    pub const fn pack(data: u64) -> [u8; 8] {
         let mut buffer = [0u8; 8];
-        for i in 0..8 {
-            buffer[i] = ((data >> (i * 8)) & 0xFF) as u8;
-        }
+        buffer[0] = (data & 0xFF) as u8;
+        buffer[1] = ((data >> 8) & 0xFF) as u8;
+        buffer[2] = ((data >> 16) & 0xFF) as u8;
+        buffer[3] = ((data >> 24) & 0xFF) as u8;
+        buffer[4] = ((data >> 32) & 0xFF) as u8;
+        buffer[5] = ((data >> 40) & 0xFF) as u8;
+        buffer[6] = ((data >> 48) & 0xFF) as u8;
+        buffer[7] = ((data >> 56) & 0xFF) as u8;
         buffer
     }
 }
