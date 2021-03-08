@@ -38,10 +38,10 @@ impl<'a> UI<'a> {
         if let Some(selected) = self.selected {
             self.text = vec![
                 Spans::from(Span::styled(
-                    format!("{}", &self.shown[selected].name),
+                    self.shown[selected].name.clone(),
                     Style::default().fg(color),
                 )),
-                Spans::from(Span::raw(format!("{}", &self.shown[selected].description))),
+                Spans::from(Span::raw(self.shown[selected].description.clone())),
             ];
             if self.verbose > 0 {
                 self.text.push(Spans::default());
@@ -103,8 +103,8 @@ impl<'a> UI<'a> {
             }
         }
 
-        // NOTE: We're not using Vec::sort(), because it doesn't sort it the way we want
-        self.shown.sort_by(|a, b| a.cmp(b));
+        // Sort the vector (should use our custom Cmp)
+        self.shown.sort();
 
         if self.shown.is_empty() {
             self.selected = None;

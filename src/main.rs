@@ -38,7 +38,7 @@ fn main() -> eyre::Result<()> {
         // Data directories
         path::PathBuf::from("/usr/share"),
         path::PathBuf::from("/usr/local/share"),
-        dirs::data_local_dir().ok_or(eyre!("failed to get local data dir"))?,
+        dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
     ]
     .iter_mut()
     {
@@ -62,7 +62,7 @@ fn main() -> eyre::Result<()> {
             ));
         }
 
-        let mut hist_db = data_dir.clone();
+        let mut hist_db = data_dir;
         hist_db.set_file_name("hist_db");
 
         db = sled::open(hist_db)?;
@@ -133,7 +133,7 @@ fn main() -> eyre::Result<()> {
             let apps = ui.shown.clone();
             let apps = apps
                 .iter()
-                .map(|app| ListItem::from(app))
+                .map(ListItem::from)
                 .collect::<Vec<ListItem>>();
 
             let list = List::new(apps)

@@ -2,7 +2,6 @@ use clap::{App, AppSettings, Arg};
 use directories::ProjectDirs;
 use serde::Deserialize;
 use std::{env, fs, io, path, process};
-use toml;
 
 #[derive(Debug)]
 pub struct Opts {

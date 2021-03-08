@@ -159,7 +159,7 @@ impl Application {
         let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {
-            if a.name == "" {
+            if a.name.is_empty() {
                 return Err(eyre!("Action is empty"));
             }
             format!("[Desktop Action {}]", a.name)
@@ -230,7 +230,7 @@ impl Application {
             }
         }
 
-        let name = name.unwrap_or("Unknown".to_string());
+        let name = name.unwrap_or_else(|| "Unknown".to_string());
 
         if exec.is_none() {
             return Err(eyre!("No command to run!"));
