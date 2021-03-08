@@ -13,18 +13,20 @@ use tui::widgets::ListItem;
 fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
     if dir.is_dir() {
         match fs::read_dir(dir) {
-            Ok(ok_dir) => for entry in ok_dir {
-                match entry {
-                    Ok(entry) => {
-                        let path = entry.path();
-                        if path.is_dir() {
-                            visit_dirs(&path, cb);
-                        } else {
-                            cb(&entry);
+            Ok(ok_dir) => {
+                for entry in ok_dir {
+                    match entry {
+                        Ok(entry) => {
+                            let path = entry.path();
+                            if path.is_dir() {
+                                visit_dirs(&path, cb);
+                            } else {
+                                cb(&entry);
+                            }
                         }
-                    },
-                    Err(error) => {
-                        eprintln!("Failed to open file {}", error);
+                        Err(error) => {
+                            eprintln!("Failed to open file {}", error);
+                        }
                     }
                 }
             }
@@ -48,9 +50,8 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
         });
 
         for file in &files {
-            let contents = fs::read_to_string(file).wrap_err_with(|| {
-                format!("Failed to read contents from {}", file.display())
-            });
+            let contents = fs::read_to_string(file)
+                .wrap_err_with(|| format!("Failed to read contents from {}", file.display()));
             match contents {
                 Ok(contents) => {
                     if let Ok(app) = Application::parse(&contents, None) {
@@ -78,7 +79,12 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
 
     for app in apps.iter_mut() {
         if let Some(packed) = db.get(app.name.as_bytes())? {
-            let unpacked = super::bytes::unpack(packed.as_ref().try_into().expect("Invalid data stored in database"));
+            let unpacked = super::bytes::unpack(
+                packed
+                    .as_ref()
+                    .try_into()
+                    .expect("Invalid data stored in database"),
+            );
             app.history = unpacked;
             app.score += (unpacked as i64) * 2;
         }
@@ -108,7 +114,9 @@ pub struct Application {
 impl Ord for Application {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         // Sort by score, highest to lowest
-        self.score.cmp(&other.score).reverse()
+        self.score
+            .cmp(&other.score)
+            .reverse()
             // Then sort alphabetically
             .then(self.name.cmp(&other.name))
     }
@@ -147,10 +155,7 @@ impl<'a> From<&'a Application> for ListItem<'a> {
 }
 
 impl Application {
-    pub fn parse<T: AsRef<str>>(
-        contents: T,
-        action: Option<Action>,
-    ) -> eyre::Result<Application> {
+    pub fn parse<T: AsRef<str>>(contents: T, action: Option<Action>) -> eyre::Result<Application> {
         let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {

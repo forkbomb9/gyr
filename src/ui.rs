@@ -62,7 +62,10 @@ impl<'a> UI<'a> {
                 self.text.push(Spans::from(text));
 
                 if self.verbose > 1 {
-                    self.text.push(Spans::from(Span::raw(format!("Times run: {}", &self.shown[selected].history))));
+                    self.text.push(Spans::from(Span::raw(format!(
+                        "Times run: {}",
+                        &self.shown[selected].history
+                    ))));
                     self.text.push(Spans::from(Span::raw(format!(
                         "\nMatching score: {}",
                         self.shown[selected].score

@@ -26,7 +26,7 @@ use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Modifier, Style};
 use tui::text::{Span, Spans};
-use tui::widgets::{Block, Borders, BorderType, List, ListItem, ListState, Paragraph, Wrap};
+use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap};
 use tui::Terminal;
 
 fn main() -> eyre::Result<()> {
@@ -38,9 +38,10 @@ fn main() -> eyre::Result<()> {
         // Data directories
         path::PathBuf::from("/usr/share"),
         path::PathBuf::from("/usr/local/share"),
-        dirs::data_local_dir()
-            .ok_or(eyre!("failed to get local data dir"))?
-    ].iter_mut() {
+        dirs::data_local_dir().ok_or(eyre!("failed to get local data dir"))?,
+    ]
+    .iter_mut()
+    {
         // Add `/applications`
         data_dir.push("applications");
         if data_dir.exists() {
@@ -55,7 +56,10 @@ fn main() -> eyre::Result<()> {
         let data_dir = project_dirs.data_local_dir().to_path_buf();
 
         if !data_dir.exists() {
-            return Err(eyre::eyre!("project data dir doesn't exist: {}", data_dir.display()));
+            return Err(eyre::eyre!(
+                "project data dir doesn't exist: {}",
+                data_dir.display()
+            ));
         }
 
         let mut hist_db = data_dir.clone();
@@ -63,7 +67,10 @@ fn main() -> eyre::Result<()> {
 
         db = sled::open(hist_db)?;
     } else {
-        return Err(eyre::eyre!("can't find data dir for {}, is your system broken?", env!("CARGO_PKG_NAME")))
+        return Err(eyre::eyre!(
+            "can't find data dir for {}, is your system broken?",
+            env!("CARGO_PKG_NAME")
+        ));
     };
 
     let apps = apps::read(dirs, &db)?;
@@ -99,12 +106,10 @@ fn main() -> eyre::Result<()> {
             let create_block = |title| {
                 Block::default()
                     .borders(Borders::ALL)
-                    .title(
-                        Span::styled(
-                            title,
-                            Style::default().add_modifier(Modifier::BOLD),
-                        )
-                    )
+                    .title(Span::styled(
+                        title,
+                        Style::default().add_modifier(Modifier::BOLD),
+                    ))
                     .border_type(BorderType::Rounded)
             };
 
