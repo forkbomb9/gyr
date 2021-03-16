@@ -41,13 +41,14 @@ There's also a config file which can be placed in `$HOME/.config/gyr/config.toml
 
 ## TODO
 
-* Most used entries first
+* ~~Most used entries first~~ Done! :tada:
 * Cached entries
 
 ## Contributing
 
-PRs are not accepted because for now this is my personal project, and I don't want to share it with anyone
-Maybe in the future :grinnig_face:
+PRs are not accepted because for now this is my personal project, and I don't want to share it with anyone.
+Maybe in the future :grinning:
+
 But you can open bug reports / feature requests!
 
 ## License
