@@ -10,6 +10,7 @@ use ui::UI;
 use input::{Event, Input};
 
 use std::env;
+use std::fs;
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::path;
@@ -56,10 +57,14 @@ fn main() -> eyre::Result<()> {
         let data_dir = project_dirs.data_local_dir().to_path_buf();
 
         if !data_dir.exists() {
-            return Err(eyre::eyre!(
-                "project data dir doesn't exist: {}",
-                data_dir.display()
-            ));
+            // Create dir if it doesn't exist
+            if let Err(error) = fs::create_dir_all(&data_dir) {
+                return Err(eyre::eyre!(
+                        "Error creating data dir {}: {}",
+                        data_dir.display(),
+                        error,
+                ));
+            }
         }
 
         let mut hist_db = data_dir;
