@@ -54,21 +54,20 @@ fn main() -> eyre::Result<()> {
 
     // Open sled database
     if let Some(project_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
-        let data_dir = project_dirs.data_local_dir().to_path_buf();
+        let mut hist_db = project_dirs.data_local_dir().to_path_buf();
 
-        if !data_dir.exists() {
+        if !hist_db.exists() {
             // Create dir if it doesn't exist
-            if let Err(error) = fs::create_dir_all(&data_dir) {
+            if let Err(error) = fs::create_dir_all(&hist_db) {
                 return Err(eyre::eyre!(
                         "Error creating data dir {}: {}",
-                        data_dir.display(),
+                        hist_db.display(),
                         error,
                 ));
             }
         }
 
-        let mut hist_db = data_dir;
-        hist_db.set_file_name("hist_db");
+        hist_db.push("hist_db");
 
         db = sled::open(hist_db)?;
     } else {
