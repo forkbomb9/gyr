@@ -15,6 +15,9 @@ license = "BSD-2-Clause"
 # GitLab CI
 gitlab = { repository = "forkbomb9/gyr"}
 
+[profile.release]
+lto = "thin"
+
 [dependencies]
 eyre = "0.6"
 clap = "2.33"
