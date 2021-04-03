@@ -60,9 +60,9 @@ fn main() -> eyre::Result<()> {
             // Create dir if it doesn't exist
             if let Err(error) = fs::create_dir_all(&hist_db) {
                 return Err(eyre::eyre!(
-                        "Error creating data dir {}: {}",
-                        hist_db.display(),
-                        error,
+                    "Error creating data dir {}: {}",
+                    hist_db.display(),
+                    error,
                 ));
             }
         }
@@ -135,10 +135,7 @@ fn main() -> eyre::Result<()> {
             let mut state = ListState::default();
 
             let apps = ui.shown.clone();
-            let apps = apps
-                .iter()
-                .map(ListItem::from)
-                .collect::<Vec<ListItem>>();
+            let apps = apps.iter().map(ListItem::from).collect::<Vec<ListItem>>();
 
             let list = List::new(apps)
                 .block(create_block("Apps"))
@@ -229,44 +226,37 @@ fn main() -> eyre::Result<()> {
 
         let commands = shell_words::split(&app_to_run.exec)?;
 
-        let mut exec;
-
         if let Some(path) = &app_to_run.path {
             env::set_current_dir(path::PathBuf::from(path)).wrap_err_with(|| {
                 format!("Failed to switch to {} when starting {}", path, app_to_run)
             })?;
         }
 
-        if !app_to_run.terminal_exec {
-            exec = process::Command::new(&commands[0]);
+        let mut runner: Vec<&str> = vec![];
 
-            // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
-            // process is already a process group leader (which isn't)
-            #[allow(unsafe_code)]
-            unsafe {
-                exec.pre_exec(|| {
-                    libc::setsid();
-                    Ok(())
-                });
-            }
-
-            exec.args(&commands[1..]);
-        } else {
-            let terminal_exec = &opts.terminal_launcher.split(' ').collect::<Vec<&str>>();
-            exec = process::Command::new(&terminal_exec[0]);
-
-            // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
-            // process is already a process group leader (which isn't)
-            #[allow(unsafe_code)]
-            unsafe {
-                exec.pre_exec(|| {
-                    libc::setsid();
-                    Ok(())
-                });
-            }
-
-            exec.args(&terminal_exec[1..]).args(&commands);
+        if opts.sway {
+            runner.extend_from_slice(&["swaymsg", "exec"]);
         }
+
+        if app_to_run.terminal_exec {
+            runner.extend_from_slice(&opts.terminal_launcher.split(' ').collect::<Vec<&str>>());
+        }
+
+        runner.extend_from_slice(&commands.iter().map(AsRef::as_ref).collect::<Vec<&str>>());
+
+        let mut exec = process::Command::new(runner[0]);
+        exec.args(&runner[1..]);
+
+        // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
+        // process is already a process group leader (which isn't)
+        #[allow(unsafe_code)]
+        unsafe {
+            exec.pre_exec(|| {
+                libc::setsid();
+                Ok(())
+            });
+        }
+
         if !opts.inherit_stdio {
             exec.stdin(process::Stdio::null())
                 .stdout(process::Stdio::null())

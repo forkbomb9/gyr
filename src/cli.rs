@@ -8,6 +8,7 @@ pub struct Opts {
     pub highlight_color: tui::style::Color,
     pub inherit_stdio: bool,
     pub terminal_launcher: String,
+    pub sway: bool,
     pub cursor_char: String,
     pub verbose: Option<u64>,
 }
@@ -18,6 +19,7 @@ impl Default for Opts {
             highlight_color: tui::style::Color::LightBlue,
             inherit_stdio: true,
             terminal_launcher: "alacritty -e".to_string(),
+            sway: false,
             cursor_char: "█".to_string(),
             verbose: None,
         }
@@ -64,6 +66,12 @@ impl Opts {
                     .help("Command to run Terminal=true apps")
                     .value_name("command")
                     .takes_value(true),
+            )
+            .arg(
+                Arg::with_name("sway")
+                    .short("s")
+                    .long("sway")
+                    .help("Use `swaymsg exec` to run commands"),
             )
             .arg(
                 Arg::with_name("cursor_char")
@@ -138,6 +146,12 @@ impl Opts {
             default.terminal_launcher = command;
         }
 
+        if matches.is_present("sway") {
+            default.sway = true;
+        } else if let Some(val) = file_conf.sway {
+            default.sway = val;
+        }
+
         if matches.is_present("verbose") {
             default.verbose = Some(matches.occurrences_of("verbose"));
         }
@@ -157,6 +171,7 @@ pub struct FileConf {
     pub highlight_color: Option<String>,
     pub inherit_stdio: Option<bool>,
     pub terminal_launcher: Option<String>,
+    pub sway: Option<bool>,
     pub cursor_char: Option<String>,
 }
 
