@@ -22,7 +22,6 @@ use eyre::WrapErr;
 use termion::event::Key;
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
 use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Modifier, Style};
@@ -80,13 +79,18 @@ fn main() -> eyre::Result<()> {
     let apps = apps::read(dirs, &db)?;
 
     // Terminal initialization
+    let raw_handle = io::stdout()
+        .into_raw_mode()
+        .wrap_err("Failed to initialize raw stdout handle")?;
     let stdout = io::stdout()
         .into_raw_mode()
         .wrap_err("Failed to init stdout")?;
     let stdout = MouseTerminal::from(stdout);
-    let stdout = AlternateScreen::from(stdout);
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend).wrap_err("Failed to start termion::Terminal")?;
+    // Clear terminal. We could use termion::screen::AlternateScreen, but then we lose panic!() and
+    // println!() output
+    terminal.clear().wrap_err("Failed to clear terminal")?;
     terminal.hide_cursor().wrap_err("Failed to hide cursor")?;
 
     let input = Input::new();
@@ -177,6 +181,7 @@ fn main() -> eyre::Result<()> {
         if let Event::Input(key) = input.next()? {
             match key {
                 Key::Esc => {
+                    terminal.clear().wrap_err("Failed to clear terminal")?;
                     return Ok(());
                 }
                 Key::Char('\n') => {
@@ -220,6 +225,12 @@ fn main() -> eyre::Result<()> {
             ui.update_info(opts.highlight_color);
         }
     }
+
+    // Reset terminal
+    terminal.clear().wrap_err("Failed to clear terminal")?;
+    raw_handle
+        .suspend_raw_mode()
+        .wrap_err("Failed to suspend raw stdout")?;
 
     if let Some(selected) = ui.selected {
         let app_to_run = &ui.shown[selected];
