@@ -246,7 +246,7 @@ fn main() -> eyre::Result<()> {
         let mut runner: Vec<&str> = vec![];
 
         if opts.sway {
-            runner.extend_from_slice(&["swaymsg", "exec"]);
+            runner.extend_from_slice(&["swaymsg", "exec", "--"]);
         }
 
         if app_to_run.terminal_exec {
