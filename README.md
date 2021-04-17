@@ -38,6 +38,7 @@ It's useful for tiling WMs, e.g. [Sway](https://swaywm.org/) or [i3](https://i3w
 
 > Note for Sway: When `$SWAYSOCK` is set, `swaymsg exec` is used to run the program.
 > This allows Sway to spawn the program in the workspace Gyr was run in
+>
 > (i3 has `libstartup-notification`, but Alacritty doesn't implement it AND I haven't found a way to do so.
 
 You can configure some things with cli flags, check `gyr --help`
