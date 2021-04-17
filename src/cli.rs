@@ -68,10 +68,10 @@ impl Opts {
                     .takes_value(true),
             )
             .arg(
-                Arg::with_name("sway")
-                    .short("s")
-                    .long("sway")
-                    .help("Use `swaymsg exec` to run commands"),
+                Arg::with_name("nosway")
+                .short("s")
+                    .long("nosway")
+                    .help("Disable Sway integration (default when `$SWAYSOCK` is empty)")
             )
             .arg(
                 Arg::with_name("cursor_char")
@@ -146,10 +146,10 @@ impl Opts {
             default.terminal_launcher = command;
         }
 
-        if matches.is_present("sway") {
-            default.sway = true;
-        } else if let Some(val) = file_conf.sway {
-            default.sway = val;
+        if !matches.is_present("nosway") {
+            if let Ok(_socket) = env::var("SWAYSOCK") {
+                default.sway = true;
+            }
         }
 
         if matches.is_present("verbose") {
@@ -171,7 +171,6 @@ pub struct FileConf {
     pub highlight_color: Option<String>,
     pub inherit_stdio: Option<bool>,
     pub terminal_launcher: Option<String>,
-    pub sway: Option<bool>,
     pub cursor_char: Option<String>,
 }
 

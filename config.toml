@@ -2,5 +2,4 @@
 highlight_color = "LightBlue"
 cursor_char = "█"
 terminal_launcher = "alacritty -e"
-sway = false
 inherit_stdio = true
