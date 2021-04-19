@@ -37,9 +37,9 @@ Oh, yes: go to the bottom with the left arrow, top with right. Cancel pressing E
 It's useful for tiling WMs, e.g. [Sway](https://swaywm.org/) or [i3](https://i3wm.org/)
 
 > Note for Sway: When `$SWAYSOCK` is set, `swaymsg exec` is used to run the program.
-> This allows Sway to spawn the program in the workspace Gyr was run in
+> This allows Sway to spawn the program in the workspace Gyr was run in.
 >
-> (i3 has `libstartup-notification`, but Alacritty doesn't implement it AND I haven't found a way to do so.
+> (i3 has `libstartup-notification`, but Alacritty doesn't implement it AND I haven't found a way to do so).
 
 You can configure some things with cli flags, check `gyr --help`
 There's also a config file which can be placed in `$HOME/.config/gyr/config.toml`/`$XDG_DATA_HOME/gyr/config.toml` ([sample](./config.toml))
