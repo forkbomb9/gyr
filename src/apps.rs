@@ -3,7 +3,7 @@ use std::fmt;
 use std::fs::{self, DirEntry};
 use std::path;
 
-use eyre::{eyre, WrapErr};
+use eyre::eyre;
 use regex::Regex;
 use tui::widgets::ListItem;
 
@@ -50,9 +50,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
         });
 
         for file in &files {
-            let contents = fs::read_to_string(file)
-                .wrap_err_with(|| format!("Failed to read contents from {}", file.display()));
-            match contents {
+            match fs::read_to_string(file) {
                 Ok(contents) => {
                     if let Ok(app) = Application::parse(&contents, None) {
                         if let Some(actions) = &app.actions {
@@ -65,13 +63,9 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
                         }
                         apps.push(app);
                     }
-                }
+                },
                 Err(error) => {
-                    if let Some(source) = error.source() {
-                        eprintln!("[ERROR]: {}: {}", error, source);
-                    } else {
-                        eprintln!("[ERROR]: {}", error);
-                    }
+                    eprintln!("[ERROR]: Failed to read contents from {}: {}", file.display(), error);
                 }
             }
         }
