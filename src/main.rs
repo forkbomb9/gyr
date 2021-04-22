@@ -235,7 +235,7 @@ fn main() -> eyre::Result<()> {
     if let Some(selected) = ui.selected {
         let app_to_run = &ui.shown[selected];
 
-        let commands = shell_words::split(&app_to_run.exec)?;
+        let commands = shell_words::split(&app_to_run.command)?;
 
         if let Some(path) = &app_to_run.path {
             env::set_current_dir(path::PathBuf::from(path)).wrap_err_with(|| {
@@ -249,7 +249,7 @@ fn main() -> eyre::Result<()> {
             runner.extend_from_slice(&["swaymsg", "exec", "--"]);
         }
 
-        if app_to_run.terminal_exec {
+        if app_to_run.is_terminal {
             runner.extend_from_slice(&opts.terminal_launcher.split(' ').collect::<Vec<&str>>());
         }
 

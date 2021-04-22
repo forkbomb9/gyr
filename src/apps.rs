@@ -92,9 +92,9 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Application {
     pub name: String,
-    pub exec: String,
+    pub command: String,
     pub description: String,
-    pub terminal_exec: bool,
+    pub is_terminal: bool,
     pub path: Option<String>,
     pub score: i64,
     pub history: u64,
@@ -237,9 +237,9 @@ impl Application {
             score: 0,
             history: 0,
             name,
-            exec,
+            command: exec,
             description,
-            terminal_exec,
+            is_terminal: terminal_exec,
             path,
             actions,
         })

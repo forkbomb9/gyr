@@ -48,14 +48,14 @@ impl<'a> UI<'a> {
 
                 let mut text = vec![];
 
-                text.push(if self.shown[selected].terminal_exec {
+                text.push(if self.shown[selected].is_terminal {
                     Span::raw("Exec (terminal): ")
                 } else {
                     Span::raw("Exec: ")
                 });
 
                 text.push(Span::styled(
-                    self.shown[selected].exec.to_string(),
+                    self.shown[selected].command.to_string(),
                     Style::default(),
                 ));
 
