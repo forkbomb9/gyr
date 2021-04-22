@@ -7,7 +7,7 @@ use eyre::eyre;
 use regex::Regex;
 use tui::widgets::ListItem;
 
-// Visit a directory, reading only the files. If another directyr is found, it'll be recursed.
+// Visit a directory, reading only the files. If another directory is found, it'll be recursed.
 // This function doesn't return anything, but prints errors when reading files and directories to
 // stderr
 fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
