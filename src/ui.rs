@@ -46,13 +46,11 @@ impl<'a> UI<'a> {
             if self.verbose > 0 {
                 self.text.push(Spans::default());
 
-                let mut text = vec![];
-
-                text.push(if self.shown[selected].is_terminal {
-                    Span::raw("Exec (terminal): ")
+                let mut text = if self.shown[selected].is_terminal {
+                    vec![Span::raw("Exec (terminal): ")]
                 } else {
-                    Span::raw("Exec: ")
-                });
+                    vec![Span::raw("Exec: ")]
+                };
 
                 text.push(Span::styled(
                     self.shown[selected].command.to_string(),
