@@ -30,11 +30,11 @@ impl<'a> UI<'a> {
         }
     }
 
-    pub fn verbose(&mut self, b: u64) {
+    pub fn verbosity(&mut self, b: u64) {
         self.verbose = b;
     }
 
-    pub fn update_info(&mut self, color: Color) {
+    pub fn info(&mut self, color: Color) {
         if let Some(selected) = self.selected {
             self.text = vec![
                 Spans::from(Span::styled(
@@ -75,7 +75,7 @@ impl<'a> UI<'a> {
         }
     }
 
-    pub fn update_filter(&mut self) {
+    pub fn filter(&mut self) {
         let mut i = 0;
         while i != self.shown.len() {
             match self.matcher.fuzzy_match(&self.shown[i].name, &self.query) {

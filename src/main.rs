@@ -99,10 +99,10 @@ fn main() -> eyre::Result<()> {
     let mut ui = UI::new(apps);
 
     if let Some(level) = opts.verbose {
-        ui.verbose(level)
+        ui.verbosity(level)
     }
 
-    ui.update_info(opts.highlight_color);
+    ui.info(opts.highlight_color);
 
     loop {
         terminal.draw(|f| {
@@ -189,11 +189,11 @@ fn main() -> eyre::Result<()> {
                 }
                 Key::Char(c) => {
                     ui.query.push(c);
-                    ui.update_filter();
+                    ui.filter();
                 }
                 Key::Backspace => {
                     ui.query.pop();
-                    ui.update_filter();
+                    ui.filter();
                 }
                 Key::Left => {
                     ui.selected = Some(0);
@@ -222,7 +222,7 @@ fn main() -> eyre::Result<()> {
                 _ => {}
             }
 
-            ui.update_info(opts.highlight_color);
+            ui.info(opts.highlight_color);
         }
     }
 
