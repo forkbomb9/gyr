@@ -80,7 +80,6 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
                     .expect("Invalid data stored in database"),
             );
             app.history = unpacked;
-            app.score += (unpacked as i64) * 2;
         }
     }
 
@@ -104,12 +103,25 @@ pub struct Application {
     actions: Option<Vec<String>>,
 }
 
+impl Application {
+    /// Returns a corrected score, mix of history and matching score
+    pub fn corrected_score(&self) -> i64 {
+        if self.history < 1 {
+            self.score
+        } else if self.score < 1 {
+            self.history as i64
+        } else {
+            self.score * self.history as i64
+        }
+    }
+}
+
 // Custom Ord implementation, sorts by history then score then alphabetically
 impl Ord for Application {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         // Sort by score, highest to lowest
-        self.score
-            .cmp(&other.score)
+        self.corrected_score()
+            .cmp(&other.corrected_score())
             .reverse()
             // Then sort alphabetically
             .then(self.name.cmp(&other.name))

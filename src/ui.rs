@@ -84,7 +84,7 @@ impl<'a> UI<'a> {
                     self.hidden.push(self.shown.remove(i));
                 }
                 Some(score) => {
-                    self.shown[i].score = score + (self.shown[i].history as i64 * 2);
+                    self.shown[i].score = score;
                     i += 1;
                 }
             }
@@ -94,7 +94,6 @@ impl<'a> UI<'a> {
         while i != self.hidden.len() {
             if let Some(score) = self.matcher.fuzzy_match(&self.hidden[i].name, &self.query) {
                 self.hidden[i].score = score;
-                self.hidden[i].score = score + (self.hidden[i].history as i64 * 2);
                 self.shown.push(self.hidden.remove(i));
             } else {
                 i += 1;
