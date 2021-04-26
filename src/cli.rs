@@ -6,6 +6,7 @@ use std::{env, fs, io, path, process};
 #[derive(Debug)]
 pub struct Opts {
     pub highlight_color: tui::style::Color,
+    pub clear_history: bool,
     pub terminal_launcher: String,
     pub sway: bool,
     pub cursor: String,
@@ -16,6 +17,7 @@ impl Default for Opts {
     fn default() -> Self {
         Self {
             highlight_color: tui::style::Color::LightBlue,
+            clear_history: false,
             terminal_launcher: "alacritty -e".to_string(),
             sway: false,
             cursor: "█".to_string(),
@@ -40,6 +42,11 @@ impl Opts {
                     .help("Config file to use")
                     .value_name("file")
                     .takes_value(true),
+            )
+            .arg(
+                Arg::with_name("clear_history")
+                .long("clear-history")
+                .help("Clears the history database")
             )
             .arg(
                 Arg::with_name("highlight_color")
@@ -122,6 +129,10 @@ impl Opts {
                     std::process::exit(1);
                 }
             }
+        }
+
+        if matches.is_present("clear_history") {
+            default.clear_history = true;
         }
 
         if let Some(command) = matches.value_of("terminal_launcher") {

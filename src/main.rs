@@ -31,24 +31,6 @@ use tui::Terminal;
 
 fn main() -> eyre::Result<()> {
     let opts = cli::Opts::new();
-
-    // Directories to look for applications
-    let mut dirs: Vec<path::PathBuf> = vec![];
-    for data_dir in [
-        // Data directories
-        path::PathBuf::from("/usr/share"),
-        path::PathBuf::from("/usr/local/share"),
-        dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
-    ]
-    .iter_mut()
-    {
-        // Add `/applications`
-        data_dir.push("applications");
-        if data_dir.exists() {
-            dirs.push(data_dir.to_path_buf());
-        }
-    }
-
     let db: sled::Db;
 
     // Open sled database
@@ -69,12 +51,37 @@ fn main() -> eyre::Result<()> {
         hist_db.push("hist_db");
 
         db = sled::open(hist_db)?;
+
+        if opts.clear_history {
+            db.clear().wrap_err("Error clearing database")?;
+            println!("Database cleared succesfully!");
+            println!("Note: to completely remove all traces of the database,
+                remove {}.", project_dirs.data_local_dir().display());
+            return Ok(());
+        }
     } else {
         return Err(eyre::eyre!(
             "can't find data dir for {}, is your system broken?",
             env!("CARGO_PKG_NAME")
         ));
     };
+
+    // Directories to look for applications
+    let mut dirs: Vec<path::PathBuf> = vec![];
+    for data_dir in [
+        // Data directories
+        path::PathBuf::from("/usr/share"),
+        path::PathBuf::from("/usr/local/share"),
+        dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
+    ]
+    .iter_mut()
+    {
+        // Add `/applications`
+        data_dir.push("applications");
+        if data_dir.exists() {
+            dirs.push(data_dir.to_path_buf());
+        }
+    }
 
     let apps = xdg::read(dirs, &db)?;
 
