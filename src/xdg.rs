@@ -37,7 +37,7 @@ fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
     }
 }
 
-pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<Application>> {
+pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<App>> {
     let mut apps = Vec::new();
 
     for dir in dirs {
@@ -52,11 +52,11 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
         for file in &files {
             match fs::read_to_string(file) {
                 Ok(contents) => {
-                    if let Ok(app) = Application::parse(&contents, None) {
+                    if let Ok(app) = App::parse(&contents, None) {
                         if let Some(actions) = &app.actions {
                             for action in actions {
                                 let ac = Action::default().name(action).from(app.name.clone());
-                                if let Ok(a) = Application::parse(&contents, Some(ac)) {
+                                if let Ok(a) = App::parse(&contents, Some(ac)) {
                                     apps.push(a);
                                 }
                             }
@@ -89,7 +89,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Application {
+pub struct App {
     pub name: String,
     pub command: String,
     pub description: String,
@@ -103,7 +103,7 @@ pub struct Application {
     actions: Option<Vec<String>>,
 }
 
-impl Application {
+impl App {
     /// Returns a corrected score, mix of history and matching score
     pub fn corrected_score(&self) -> i64 {
         if self.history < 1 {
@@ -117,7 +117,7 @@ impl Application {
 }
 
 // Custom Ord implementation, sorts by history then score then alphabetically
-impl Ord for Application {
+impl Ord for App {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         // Sort by score, highest to lowest
         self.corrected_score()
@@ -129,39 +129,39 @@ impl Ord for Application {
 }
 
 // Custom PartialOrd, uses our custom Ord
-impl PartialOrd for Application {
+impl PartialOrd for App {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(&other))
     }
 }
 
-impl fmt::Display for Application {
+impl fmt::Display for App {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)
     }
 }
 
 // This is needed for the SelectableList widget.
-impl AsRef<str> for Application {
+impl AsRef<str> for App {
     fn as_ref(&self) -> &str {
         self.name.as_ref()
     }
 }
 
-impl<'a> From<Application> for ListItem<'a> {
-    fn from(app: Application) -> ListItem<'a> {
+impl<'a> From<App> for ListItem<'a> {
+    fn from(app: App) -> ListItem<'a> {
         ListItem::new(app.name)
     }
 }
 
-impl<'a> From<&'a Application> for ListItem<'a> {
-    fn from(app: &'a Application) -> ListItem<'a> {
+impl<'a> From<&'a App> for ListItem<'a> {
+    fn from(app: &'a App) -> ListItem<'a> {
         ListItem::new(app.name.clone())
     }
 }
 
-impl Application {
-    pub fn parse<T: AsRef<str>>(contents: T, action: Option<Action>) -> eyre::Result<Application> {
+impl App {
+    pub fn parse<T: AsRef<str>>(contents: T, action: Option<Action>) -> eyre::Result<App> {
         let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {
@@ -245,7 +245,7 @@ impl Application {
         let exec = exec.unwrap();
         let description = description.unwrap_or_default();
 
-        Ok(Application {
+        Ok(App {
             score: 0,
             history: 0,
             name,

@@ -1,13 +1,13 @@
 #![deny(unsafe_code)]
 
-mod apps;
 mod cli;
 #[allow(dead_code)]
 mod input;
 mod ui;
-use ui::UI;
+mod xdg;
 
 use input::{Event, Input};
+use ui::UI;
 
 use std::env;
 use std::fs;
@@ -76,7 +76,7 @@ fn main() -> eyre::Result<()> {
         ));
     };
 
-    let apps = apps::read(dirs, &db)?;
+    let apps = xdg::read(dirs, &db)?;
 
     // Terminal initialization
     let raw_handle = io::stdout()

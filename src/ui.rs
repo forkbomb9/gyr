@@ -2,11 +2,11 @@ use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tui::style::{Color, Style};
 use tui::text::{Span, Spans, Text};
 
-use super::apps;
+use super::xdg;
 
 pub struct UI<'a> {
-    pub hidden: Vec<apps::Application>,
-    pub shown: Vec<apps::Application>,
+    pub hidden: Vec<xdg::App>,
+    pub shown: Vec<xdg::App>,
     pub selected: Option<usize>,
     pub text: Vec<Spans<'a>>,
     pub query: String,
@@ -17,7 +17,7 @@ pub struct UI<'a> {
 }
 
 impl<'a> UI<'a> {
-    pub fn new(items: Vec<apps::Application>) -> UI<'a> {
+    pub fn new(items: Vec<xdg::App>) -> UI<'a> {
         UI {
             shown: items,
             hidden: vec![],
