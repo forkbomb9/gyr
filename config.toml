@@ -1,5 +1,4 @@
 # Default values
 highlight_color = "LightBlue"
-cursor_char = "█"
+cursor = "█"
 terminal_launcher = "alacritty -e"
-inherit_stdio = true

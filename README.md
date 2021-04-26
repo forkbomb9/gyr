@@ -42,7 +42,14 @@ It's useful for tiling WMs, e.g. [Sway](https://swaywm.org/) or [i3](https://i3w
 > (i3 has `libstartup-notification`, but Alacritty doesn't implement it AND I haven't found a way to do so).
 
 You can configure some things with cli flags, check `gyr --help`
-There's also a config file which can be placed in `$HOME/.config/gyr/config.toml`/`$XDG_DATA_HOME/gyr/config.toml` ([sample](./config.toml))
+
+There's also a config file which can be placed in `$HOME/.config/gyr/config.toml` or `$XDG_DATA_HOME/gyr/config.toml` ([sample](./config.toml))
+
+Verbosity levels (`-v`, `-vv`, `-vvv`, each level adds logs to the previous one):
+
+* `-v`: will make the launched binary inherit Gyr's `stdio`. (which means you'll see the logs)
+* `-vv`: will show the path of each app in the info
+* `-vvv`: adds some debug information (number of times the apps were run, etc.)
 
 ## TODO
 

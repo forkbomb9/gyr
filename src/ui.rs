@@ -43,7 +43,7 @@ impl<'a> UI<'a> {
                 )),
                 Spans::from(Span::raw(self.shown[selected].description.clone())),
             ];
-            if self.verbose > 0 {
+            if self.verbose > 1 {
                 self.text.push(Spans::default());
 
                 let mut text = if self.shown[selected].is_terminal {
@@ -59,7 +59,7 @@ impl<'a> UI<'a> {
 
                 self.text.push(Spans::from(text));
 
-                if self.verbose > 1 {
+                if self.verbose > 2 {
                     self.text.push(Spans::from(Span::raw(format!(
                         "Times run: {}",
                         &self.shown[selected].history

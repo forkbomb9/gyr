@@ -168,7 +168,7 @@ fn main() -> eyre::Result<()> {
                 Span::styled(">", Style::default().fg(opts.highlight_color)),
                 Span::raw("> "),
                 Span::raw(&ui.query),
-                Span::raw(&opts.cursor_char),
+                Span::raw(&opts.cursor),
             ]))
             .block(create_block(""))
             .style(Style::default())
@@ -268,7 +268,7 @@ fn main() -> eyre::Result<()> {
             });
         }
 
-        if !opts.inherit_stdio {
+        if opts.verbose.unwrap_or(0) > 0 {
             exec.stdin(process::Stdio::null())
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())

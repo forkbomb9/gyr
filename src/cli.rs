@@ -6,10 +6,9 @@ use std::{env, fs, io, path, process};
 #[derive(Debug)]
 pub struct Opts {
     pub highlight_color: tui::style::Color,
-    pub inherit_stdio: bool,
     pub terminal_launcher: String,
     pub sway: bool,
-    pub cursor_char: String,
+    pub cursor: String,
     pub verbose: Option<u64>,
 }
 
@@ -17,10 +16,9 @@ impl Default for Opts {
     fn default() -> Self {
         Self {
             highlight_color: tui::style::Color::LightBlue,
-            inherit_stdio: true,
             terminal_launcher: "alacritty -e".to_string(),
             sway: false,
-            cursor_char: "█".to_string(),
+            cursor: "█".to_string(),
             verbose: None,
         }
     }
@@ -52,14 +50,6 @@ impl Opts {
                     .takes_value(true),
             )
             .arg(
-                Arg::with_name("inherit_stdio")
-                    .short("n")
-                    .long("dont-inherit-stdio")
-                    .help(
-                        "The launched app won't inherit the stdio (i.e. it won't print anything)",
-                    ),
-            )
-            .arg(
                 Arg::with_name("terminal_launcher")
                     .short("t")
                     .long("terminal-launcher")
@@ -74,7 +64,7 @@ impl Opts {
                     .help("Disable Sway integration (default when `$SWAYSOCK` is empty)")
             )
             .arg(
-                Arg::with_name("cursor_char")
+                Arg::with_name("cursor")
                     .long("cursor")
                     .help("Cursor character for the search")
                     .value_name("char")
@@ -121,12 +111,6 @@ impl Opts {
 
         let file_conf = file_conf.unwrap_or_default();
 
-        if matches.is_present("inherit_stdio") {
-            default.inherit_stdio = false;
-        } else if let Some(val) = file_conf.inherit_stdio {
-            default.inherit_stdio = val;
-        }
-
         if let Some(color) = matches.value_of("highlight_color") {
             default.highlight_color = string_to_color(color).unwrap();
         } else if let Some(color) = file_conf.highlight_color {
@@ -156,10 +140,10 @@ impl Opts {
             default.verbose = Some(matches.occurrences_of("verbose"));
         }
 
-        if let Some(r#char) = matches.value_of("cursor_char") {
-            default.cursor_char = r#char.to_string();
-        } else if let Some(r#char) = file_conf.cursor_char {
-            default.cursor_char = r#char;
+        if let Some(c) = matches.value_of("cursor") {
+            default.cursor = c.to_string();
+        } else if let Some(c) = file_conf.cursor {
+            default.cursor = c;
         }
 
         default
@@ -169,9 +153,8 @@ impl Opts {
 #[derive(Debug, Deserialize, Default)]
 pub struct FileConf {
     pub highlight_color: Option<String>,
-    pub inherit_stdio: Option<bool>,
     pub terminal_launcher: Option<String>,
-    pub cursor_char: Option<String>,
+    pub cursor: Option<String>,
 }
 
 impl FileConf {
