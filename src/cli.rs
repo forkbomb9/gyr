@@ -33,7 +33,6 @@ impl Opts {
             .version(env!("CARGO_PKG_VERSION"))
             .author("Namkhai B. <echo bmFta2hhaS5uM0Bwcm90b25tYWlsLmNvbQo= | base64 -d>")
             .about(env!("CARGO_PKG_DESCRIPTION"))
-            .setting(AppSettings::ColoredHelp)
             .setting(AppSettings::UnifiedHelpMessage)
             .arg(
                 Arg::with_name("config")
