@@ -17,8 +17,7 @@ Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 
 ## Install
 
-Once I setup the CI, there'll be binaries for FreeBSD and Linux.
-But for now, build from source:
+#### Option 1: Build from source
 
 * Install [Rust](https://www.rust-lang.org/learn/get-started)
 * Build:
@@ -28,6 +27,12 @@ But for now, build from source:
     ```
 
 * Copy `target/release/gyr` to somewhere in your `$PATH`
+
+#### Option 2: Pre-built binaries
+
+Can be found in the [releases](https://gitlab.com/forkbomb9/gyr/-/releases) page.
+
+They are built for Linux using the musl libc, and are available for x86_64, aarch64, armv7 and arm (which covers armv7 too, but without optimizations)
 
 ## Usage
 
