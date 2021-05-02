@@ -13,6 +13,7 @@ Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 - [Usage](#usage)
 - [TODO](#todos)
 - [Contributing](#contributing)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## Install
@@ -67,6 +68,10 @@ PRs are not accepted because for now this is my personal project, and I don't wa
 Maybe in the future :grinning:
 
 But you can open bug reports / feature requests!
+
+## Changelog
+
+Notable changes will be documented in the [CHANGELOG](./CHANGELOG.md) file
 
 ## License
 
