@@ -50,7 +50,7 @@ fn main() -> eyre::Result<()> {
 
         hist_db.push("hist_db");
 
-        db = sled::open(hist_db)?;
+        db = sled::open(hist_db).wrap_err("Failed to open database")?;
 
         if opts.clear_history {
             db.clear().wrap_err("Error clearing database")?;
