@@ -63,9 +63,13 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
                         }
                         apps.push(app);
                     }
-                },
+                }
                 Err(error) => {
-                    eprintln!("[ERROR]: Failed to read contents from {}: {}", file.display(), error);
+                    eprintln!(
+                        "[ERROR]: Failed to read contents from {}: {}",
+                        file.display(),
+                        error
+                    );
                 }
             }
         }

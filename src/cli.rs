@@ -44,8 +44,8 @@ impl Opts {
             )
             .arg(
                 Arg::with_name("clear_history")
-                .long("clear-history")
-                .help("Clears the history database")
+                    .long("clear-history")
+                    .help("Clears the history database"),
             )
             .arg(
                 Arg::with_name("highlight_color")
@@ -65,9 +65,9 @@ impl Opts {
             )
             .arg(
                 Arg::with_name("nosway")
-                .short("s")
+                    .short("s")
                     .long("nosway")
-                    .help("Disable Sway integration (default when `$SWAYSOCK` is empty)")
+                    .help("Disable Sway integration (default when `$SWAYSOCK` is empty)"),
             )
             .arg(
                 Arg::with_name("cursor")

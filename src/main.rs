@@ -55,8 +55,11 @@ fn main() -> eyre::Result<()> {
         if opts.clear_history {
             db.clear().wrap_err("Error clearing database")?;
             println!("Database cleared succesfully!");
-            println!("Note: to completely remove all traces of the database,
-                remove {}.", project_dirs.data_local_dir().display());
+            println!(
+                "Note: to completely remove all traces of the database,
+                remove {}.",
+                project_dirs.data_local_dir().display()
+            );
             return Ok(());
         }
     } else {
