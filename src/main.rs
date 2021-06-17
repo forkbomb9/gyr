@@ -114,13 +114,23 @@ fn main() -> eyre::Result<()> {
 
     ui.info(opts.highlight_color);
 
+    // App list
+    let mut app_state = ListState::default();
+
     loop {
         terminal.draw(|f| {
-            let chunks = Layout::default()
+            // Split the window in half.
+            //
+            // window[0] will hold the query, fixed length.
+            // window[1] will be split in two, list and query.
+            let window = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Length(8), Constraint::Min(2)].as_ref())
                 .split(f.size());
 
+            // Create a block.
+            //
+            // Rounded borders and bold title
             let create_block = |title| {
                 Block::default()
                     .borders(Borders::ALL)
@@ -131,42 +141,51 @@ fn main() -> eyre::Result<()> {
                     .border_type(BorderType::Rounded)
             };
 
-            let bottom_chunks = Layout::default()
+            // Split window[1] horizontally.
+            //
+            // bottom_half[0] will hold the app list, miminum length 3.
+            // bottom_half[1] will hold the query, fixed length 3.
+            let bottom_half = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Min(3), Constraint::Length(3)].as_ref())
-                .split(chunks[1]);
+                .split(window[1]);
 
-            // Text for description
+            // Description of the current app.
             let description = Paragraph::new(ui.text.clone())
                 .block(create_block("Gyr launcher"))
                 .style(Style::default())
+                // Don't trim leading spaces when wrapping
                 .wrap(Wrap { trim: false })
                 .alignment(Alignment::Left);
 
-            f.render_widget(description, chunks[0]);
+            // Convert app list to Vec<ListItem>
+            let apps = ui
+                .shown
+                .iter()
+                .map(ListItem::from)
+                .collect::<Vec<ListItem>>();
 
-            // App list
-            let mut state = ListState::default();
-
-            let apps = ui.shown.clone();
-            let apps = apps.iter().map(ListItem::from).collect::<Vec<ListItem>>();
-
+            // App list (stateful widget)
             let list = List::new(apps)
                 .block(create_block("Apps"))
                 .style(Style::default())
+                // Bold & colorized selection
                 .highlight_style(
                     Style::default()
                         .fg(opts.highlight_color)
                         .add_modifier(Modifier::BOLD),
                 )
+                // Prefixed before the list item
                 .highlight_symbol("> ");
 
-            state.select(ui.selected);
-
-            f.render_stateful_widget(list, bottom_chunks[0], &mut state);
+            // Update selection
+            app_state.select(ui.selected);
 
             // Query
             let query = Paragraph::new(Spans::from(vec![
+                // The resulting style will be:
+                // (10/51) >> filter
+                // With `10` and the first `>` colorized with the highlight color
                 Span::raw("("),
                 Span::styled(
                     (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
@@ -180,37 +199,51 @@ fn main() -> eyre::Result<()> {
                 Span::raw(&ui.query),
                 Span::raw(&opts.cursor),
             ]))
+            // No title
             .block(create_block(""))
             .style(Style::default())
             .alignment(Alignment::Left)
             .wrap(tui::widgets::Wrap { trim: false });
 
-            f.render_widget(query, bottom_chunks[1])
+            // Render description
+            f.render_widget(description, window[0]);
+            // Render app list
+            f.render_stateful_widget(list, bottom_half[0], &mut app_state);
+            // Render query
+            f.render_widget(query, bottom_half[1])
         })?;
 
         if let Event::Input(key) = input.next()? {
             match key {
+                // Exit on escape
                 Key::Esc => {
                     terminal.clear().wrap_err("Failed to clear terminal")?;
                     return Ok(());
                 }
+                // Run app on enter
                 Key::Char('\n') => {
                     break;
                 }
+                // Add character to query
                 Key::Char(c) => {
                     ui.query.push(c);
                     ui.filter();
                 }
+                // Remove character from query
                 Key::Backspace => {
                     ui.query.pop();
                     ui.filter();
                 }
+                // Go to top of list
                 Key::Left => {
                     ui.selected = Some(0);
                 }
+                // Go to end of list
                 Key::Right => {
                     ui.selected = Some(ui.shown.len() - 1);
                 }
+                // Go down one item.
+                // If we're at the bottom, back to the top.
                 Key::Down => {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected >= ui.shown.len() - 1 {
@@ -220,6 +253,8 @@ fn main() -> eyre::Result<()> {
                         };
                     }
                 }
+                // Go up one item.
+                // If we're at the top, go to the end.
                 Key::Up => {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected > 0 {
@@ -245,30 +280,40 @@ fn main() -> eyre::Result<()> {
     if let Some(selected) = ui.selected {
         let app_to_run = &ui.shown[selected];
 
+        // Split command in a shell-parseable format.
         let commands = shell_words::split(&app_to_run.command)?;
 
+        // Switch to path specified by app to be run
         if let Some(path) = &app_to_run.path {
             env::set_current_dir(path::PathBuf::from(path)).wrap_err_with(|| {
                 format!("Failed to switch to {} when starting {}", path, app_to_run)
             })?;
         }
 
+        // Actual commands being run
         let mut runner: Vec<&str> = vec![];
 
+        // Use `swaymsg` to run the command.
+        // Allows Sway to move the app to the workspace Gyr was run in.
         if opts.sway {
             runner.extend_from_slice(&["swaymsg", "exec", "--"]);
         }
 
+        // Use terminal runner to run the app.
         if app_to_run.is_terminal {
             runner.extend_from_slice(&opts.terminal_launcher.split(' ').collect::<Vec<&str>>());
         }
 
+        // Add app commands
         runner.extend_from_slice(&commands.iter().map(AsRef::as_ref).collect::<Vec<&str>>());
 
         let mut exec = process::Command::new(runner[0]);
         exec.args(&runner[1..]);
 
-        // Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
+        // Set program as session leader.
+        // Otherwise the OS may kill the app after the Gyr exits.
+        //
+        // # Safety: pre_exec() isn't modifyng the memory and setsid() fails if the calling
         // process is already a process group leader (which isn't)
         #[allow(unsafe_code)]
         unsafe {
