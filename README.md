@@ -35,7 +35,7 @@ Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 
 Can be found in the [releases](https://gitlab.com/forkbomb9/gyr/-/releases) page.
 
-They are built for Linux using the musl libc, and are available for x86_64, aarch64, armv7 and arm (which covers armv7 too, but without optimizations)
+They available for Linux, statically built against the musl libc for `x86_64` and `aarch64`.
 
 ## Usage
 
