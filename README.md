@@ -7,6 +7,8 @@
 
 Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
 
+[![asciicast](https://asciinema.org/a/vorSSCeHy9KOxUp1fpZuvYiEC.svg)](https://asciinema.org/a/vorSSCeHy9KOxUp1fpZuvYiEC)
+
 ## Table of Contents
 
 - [Install](#install)
