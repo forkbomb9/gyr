@@ -37,6 +37,8 @@ Can be found in the [releases](https://gitlab.com/forkbomb9/gyr/-/releases) page
 
 They available for Linux, statically built against the musl libc for `x86_64` and `aarch64`.
 
+For FreeBSD, I'm working on writting and publishing a port (It builds fine).
+
 ## Usage
 
 Run `gyr` from a terminal. Scroll through the app list, find some app typing chars, run selected pressing ENTER. Pretty straightforward.
