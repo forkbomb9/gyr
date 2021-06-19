@@ -4,19 +4,32 @@ use tui::text::{Span, Spans, Text};
 
 use super::xdg;
 
+/// Application filtering and sorting facility
 pub struct UI<'a> {
+    /// Hidden apps (They don't match the current query)
     pub hidden: Vec<xdg::App>,
+    /// Shown apps (They match the current query)
     pub shown: Vec<xdg::App>,
+    /// Current selection (index of `self.shown`)
     pub selected: Option<usize>,
+    /// Info text
     pub text: Vec<Spans<'a>>,
+    /// User query (used for matching)
     pub query: String,
+    /// UI log (not used in Gyr)
     pub log: Vec<Text<'a>>,
+    /// Verbosity level
     pub verbose: u64,
     #[doc(hidden)]
+    // Matching algorithm
     matcher: SkimMatcherV2,
 }
 
 impl<'a> UI<'a> {
+    // @TODO: Check that this link is correct
+    /// Creates a new UI from a `Vec` of [App]s
+    ///
+    /// [App]: super::xdg::App
     pub fn new(items: Vec<xdg::App>) -> UI<'a> {
         UI {
             shown: items,
@@ -30,12 +43,17 @@ impl<'a> UI<'a> {
         }
     }
 
+    /// Set verbosity level
     pub fn verbosity(&mut self, b: u64) {
         self.verbose = b;
     }
 
+    /// Update self.info to current selection
+    ///
+    /// Should be called every time `self.selected` changes
     pub fn info(&mut self, color: Color) {
         if let Some(selected) = self.selected {
+            // If there's some selection, update info
             self.text = vec![
                 Spans::from(Span::styled(
                     self.shown[selected].name.clone(),
@@ -71,18 +89,27 @@ impl<'a> UI<'a> {
                 }
             }
         } else {
+            // Else, clear info
             self.text.clear();
         }
     }
 
+    /// Updates shown and hidden apps
+    ///
+    /// Matches using `fuzzy_matcher`, with pattern being `self.query`
+    /// Should be called every time user adds/removes characters from `self.query`
     pub fn filter(&mut self) {
+        // Hide apps that do *not* match the current filter,
+        // and update score for the ones that do
         let mut i = 0;
         while i != self.shown.len() {
             match self.matcher.fuzzy_match(&self.shown[i].name, &self.query) {
+                // No match. Set score to 0 and move to self.hidden
                 None => {
                     self.shown[i].score = 0;
                     self.hidden.push(self.shown.remove(i));
                 }
+                // Item matched query. Update score
                 Some(score) => {
                     self.shown[i].score = score;
                     i += 1;
@@ -90,6 +117,7 @@ impl<'a> UI<'a> {
             }
         }
 
+        // Re-add hidden apps that *do* match the current filter, and update their score
         i = 0;
         while i != self.hidden.len() {
             if let Some(score) = self.matcher.fuzzy_match(&self.hidden[i].name, &self.query) {
@@ -103,10 +131,13 @@ impl<'a> UI<'a> {
         // Sort the vector (should use our custom Cmp)
         self.shown.sort();
 
+        // Reset selection to beginning (don't want to have the user go to the start
         if self.shown.is_empty() {
+            // Can't select anything if there's no items
             self.selected = None;
             self.log.push(Text::raw("NO ITEMS!"));
         } else {
+            // The list changed, go to first item
             self.selected = Some(0);
         }
 

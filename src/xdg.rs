@@ -7,9 +7,10 @@ use eyre::eyre;
 use regex::Regex;
 use tui::widgets::ListItem;
 
-// Visit a directory, reading only the files. If another directory is found, it'll be recursed.
-// This function doesn't return anything, but prints errors when reading files and directories to
-// stderr
+/// Visit a directory, reading only the files. If another directory is found, it'll be recursed.
+///
+/// This function doesn't return anything, but prints errors when reading files and directories to
+/// stderr
 fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
     if dir.is_dir() {
         match fs::read_dir(dir) {
@@ -37,6 +38,9 @@ fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
     }
 }
 
+/// Find XDG applications in `dirs` (recursive).
+///
+/// Updates history using the database
 pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<App>> {
     let mut apps = Vec::new();
 
@@ -92,14 +96,26 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
     Ok(apps)
 }
 
+/// An XDG Specification App
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct App {
+    /// App name
     pub name: String,
+    /// Command to run
     pub command: String,
+    /// App description
     pub description: String,
+    /// Whether the app should be run in terminal
     pub is_terminal: bool,
+    /// Path from which to run the command
     pub path: Option<String>,
+    /// Matching score (used in [UI](super::ui::UI))
+    ///
+    /// Not part of the specification
     pub score: i64,
+    /// Number of times this app was run
+    ///
+    /// Not part of the specification
     pub history: u64,
 
     // This is not pub because I use it only on this file
@@ -145,7 +161,7 @@ impl fmt::Display for App {
     }
 }
 
-// This is needed for the SelectableList widget.
+// Will be used to display `App`s in the list
 impl AsRef<str> for App {
     fn as_ref(&self) -> &str {
         self.name.as_ref()
@@ -165,6 +181,7 @@ impl<'a> From<&'a App> for ListItem<'a> {
 }
 
 impl App {
+    /// Parse an application, or, if `action.is_some()`, an app action
     pub fn parse<T: AsRef<str>>(contents: T, action: Option<Action>) -> eyre::Result<App> {
         let contents: &str = contents.as_ref();
 
@@ -213,6 +230,8 @@ impl App {
                 } else if line.starts_with("Exec=") && exec.is_none() {
                     let line = line.trim_start_matches("Exec=");
 
+                    // Trim %u/%U/%someLetter (which is used as arguments when launching XDG apps,
+                    // not used by Gyr)
                     let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
                     let mut trimmed = line.to_string();
 
@@ -262,18 +281,25 @@ impl App {
     }
 }
 
+/// An app action
+///
+/// In gyr every action is some app, with the action name in parentheses
 #[derive(Default)]
 pub struct Action {
+    /// Action name
     name: String,
+    /// App name
     from: String,
 }
 
 impl Action {
+    /// Set the action's name
     fn name(mut self, name: impl Into<String>) -> Self {
         self.name = name.into();
         self
     }
 
+    /// Set the action's app name
     fn from(mut self, from: impl Into<String>) -> Self {
         self.from = from.into();
         self

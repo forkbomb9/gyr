@@ -3,13 +3,24 @@ use directories::ProjectDirs;
 use serde::Deserialize;
 use std::{env, fs, io, path, process};
 
+/// Command line interface.
+///
+/// The parsing uses [clap]
+///
+/// [Clap]: clap
 #[derive(Debug)]
 pub struct Opts {
+    /// Highlight color used in the UI
     pub highlight_color: tui::style::Color,
+    /// Clear the history database
     pub clear_history: bool,
+    /// Command to run Terminal=true apps
     pub terminal_launcher: String,
+    /// Enable Sway integration (default when `$SWAYSOCK` is not empty)
     pub sway: bool,
+    /// Cursor character for the search
     pub cursor: String,
+    /// Verbosity level
     pub verbose: Option<u64>,
 }
 
@@ -27,6 +38,7 @@ impl Default for Opts {
 }
 
 impl Opts {
+    /// Parses the cli arguments
     pub fn new() -> Self {
         let mut default = Self::default();
         let matches = App::new(env!("CARGO_PKG_NAME"))
@@ -141,6 +153,7 @@ impl Opts {
         }
 
         if !matches.is_present("nosway") {
+            // If sway mode isn't explicitly disabled, enable it when `SWAYSOCK` is set.
             if let Ok(_socket) = env::var("SWAYSOCK") {
                 default.sway = true;
             }
@@ -160,20 +173,33 @@ impl Opts {
     }
 }
 
+/// File configuration, parsed with [serde]
+///
+/// [serde]: serde
 #[derive(Debug, Deserialize, Default)]
 pub struct FileConf {
+    /// Highlight color used in the UI
     pub highlight_color: Option<String>,
+    /// Command to run Terminal=true apps
     pub terminal_launcher: Option<String>,
+    /// Cursor character for the search
     pub cursor: Option<String>,
 }
 
 impl FileConf {
+    /// Parse a file.
     pub fn read<P: AsRef<path::Path>>(input_file: P) -> Result<Self, io::Error> {
         let config: Self = toml::from_str(&fs::read_to_string(&input_file)?)?;
         Ok(config)
     }
 }
 
+/// Parses a [String] into a tui [color]
+///
+/// Case-insensitive
+///
+/// [String]: std::string::String
+/// [color]: tui::style::Color
 fn string_to_color<T: Into<String>>(val: T) -> Result<tui::style::Color, &'static str> {
     match val.into().to_lowercase().as_ref() {
         "black" => Ok(tui::style::Color::Black),

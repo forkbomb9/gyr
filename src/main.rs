@@ -1,9 +1,20 @@
 #![deny(unsafe_code)]
+#![deny(missing_docs)]
 
+//! # Gyr
+//!
+//! > a _blazing fast_ TUI launcher for *BSD and Linux
+//!
+//! For more info, check the [README](https://gitlab.com/forkbomb9/gyr)
+
+/// CLI parser
 mod cli;
+/// Terminal input helpers
 #[allow(dead_code)]
 mod input;
+/// Ui helpers
 mod ui;
+/// XDG apps
 mod xdg;
 
 use input::{Event, Input};
@@ -86,9 +97,10 @@ fn main() -> eyre::Result<()> {
         }
     }
 
+    // Read applications
     let apps = xdg::read(dirs, &db)?;
 
-    // Terminal initialization
+    // Initialize the terminal
     let raw_handle = io::stdout()
         .into_raw_mode()
         .wrap_err("Failed to initialize raw stdout handle")?;
@@ -103,21 +115,25 @@ fn main() -> eyre::Result<()> {
     terminal.clear().wrap_err("Failed to clear terminal")?;
     terminal.hide_cursor().wrap_err("Failed to hide cursor")?;
 
+    // Input handler
     let input = Input::new();
 
-    // UI
+    // App UI
     let mut ui = UI::new(apps);
 
+    // Set user-defined verbosity level
     if let Some(level) = opts.verbose {
         ui.verbosity(level)
     }
 
+    // Set highlight color
     ui.info(opts.highlight_color);
 
     // App list
     let mut app_state = ListState::default();
 
     loop {
+        // Draw UI
         terminal.draw(|f| {
             // Split the window in half.
             //
@@ -213,6 +229,7 @@ fn main() -> eyre::Result<()> {
             f.render_widget(query, bottom_half[1])
         })?;
 
+        // Handle user input
         if let Event::Input(key) = input.next()? {
             match key {
                 // Exit on escape
@@ -344,7 +361,11 @@ fn main() -> eyre::Result<()> {
     Ok(())
 }
 
+/// Byte packer and unpacker
 mod bytes {
+    /// Unacks an `[u8; 8]` array into a single `u64`, previously packed with [pack]
+    ///
+    /// [pack]: pack
     pub const fn unpack(buffer: [u8; 8]) -> u64 {
         let mut data = 0u64;
         data |= buffer[0] as u64;
@@ -358,6 +379,11 @@ mod bytes {
         data
     }
 
+    /// Packs an `u64` into a `[u8; 8]` array.
+    ///
+    /// Can be unpacked with [unpack].
+    ///
+    /// [unpack]: unpack
     pub const fn pack(data: u64) -> [u8; 8] {
         let mut buffer = [0u8; 8];
         buffer[0] = (data & 0xFF) as u8;
