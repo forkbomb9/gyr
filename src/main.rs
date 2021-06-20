@@ -41,7 +41,7 @@ use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragr
 use tui::Terminal;
 
 fn main() -> eyre::Result<()> {
-    let opts = cli::Opts::new();
+    let cli = cli::parse();
     let db: sled::Db;
 
     // Open sled database
@@ -63,7 +63,7 @@ fn main() -> eyre::Result<()> {
 
         db = sled::open(hist_db).wrap_err("Failed to open database")?;
 
-        if opts.clear_history {
+        if cli.clear_history {
             db.clear().wrap_err("Error clearing database")?;
             println!("Database cleared succesfully!");
             println!(
@@ -122,12 +122,12 @@ fn main() -> eyre::Result<()> {
     let mut ui = UI::new(apps);
 
     // Set user-defined verbosity level
-    if let Some(level) = opts.verbose {
+    if let Some(level) = cli.verbose {
         ui.verbosity(level)
     }
 
     // Set highlight color
-    ui.info(opts.highlight_color);
+    ui.info(cli.highlight_color);
 
     // App list
     let mut app_state = ListState::default();
@@ -188,7 +188,7 @@ fn main() -> eyre::Result<()> {
                 // Bold & colorized selection
                 .highlight_style(
                     Style::default()
-                        .fg(opts.highlight_color)
+                        .fg(cli.highlight_color)
                         .add_modifier(Modifier::BOLD),
                 )
                 // Prefixed before the list item
@@ -205,15 +205,15 @@ fn main() -> eyre::Result<()> {
                 Span::raw("("),
                 Span::styled(
                     (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
-                    Style::default().fg(opts.highlight_color),
+                    Style::default().fg(cli.highlight_color),
                 ),
                 Span::raw("/"),
                 Span::raw(ui.shown.len().to_string()),
                 Span::raw(") "),
-                Span::styled(">", Style::default().fg(opts.highlight_color)),
+                Span::styled(">", Style::default().fg(cli.highlight_color)),
                 Span::raw("> "),
                 Span::raw(&ui.query),
-                Span::raw(&opts.cursor),
+                Span::raw(&cli.cursor),
             ]))
             // No title
             .block(create_block(""))
@@ -284,7 +284,7 @@ fn main() -> eyre::Result<()> {
                 _ => {}
             }
 
-            ui.info(opts.highlight_color);
+            ui.info(cli.highlight_color);
         }
     }
 
@@ -312,13 +312,13 @@ fn main() -> eyre::Result<()> {
 
         // Use `swaymsg` to run the command.
         // Allows Sway to move the app to the workspace Gyr was run in.
-        if opts.sway {
+        if cli.sway {
             runner.extend_from_slice(&["swaymsg", "exec", "--"]);
         }
 
         // Use terminal runner to run the app.
         if app_to_run.is_terminal {
-            runner.extend_from_slice(&opts.terminal_launcher.split(' ').collect::<Vec<&str>>());
+            runner.extend_from_slice(&cli.terminal_launcher.split(' ').collect::<Vec<&str>>());
         }
 
         // Add app commands
@@ -340,7 +340,7 @@ fn main() -> eyre::Result<()> {
             });
         }
 
-        if opts.verbose.unwrap_or(0) > 0 {
+        if cli.verbose.unwrap_or(0) > 0 {
             exec.stdin(process::Stdio::null())
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())
