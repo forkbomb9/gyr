@@ -40,7 +40,17 @@ use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap};
 use tui::Terminal;
 
-fn main() -> eyre::Result<()> {
+fn main() {
+    if let Err(error) = real_main() {
+        eprintln!("{:?}\n", error);
+        eprintln!("Press enter...");
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).ok();
+        process::exit(1);
+    }
+}
+
+fn real_main() -> eyre::Result<()> {
     let cli = cli::parse();
     let db: sled::Db;
 
