@@ -20,7 +20,7 @@ lto = true
 
 [dependencies]
 eyre = "0.6"
-clap = "2.33"
+lexopt = "0.1"
 directories = "3.0"
 dirs = "3.0"
 fuzzy-matcher = "0.3"

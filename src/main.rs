@@ -51,7 +51,7 @@ fn main() {
 }
 
 fn real_main() -> eyre::Result<()> {
-    let cli = cli::parse();
+    let cli = cli::parse()?;
     let db: sled::Db;
 
     // Open sled database
