@@ -4,7 +4,7 @@ use std::fs::{self, DirEntry};
 use std::path;
 
 use eyre::eyre;
-use regex::Regex;
+use safe_regex::{regex, Matcher1};
 use tui::widgets::ListItem;
 
 /// Visit a directory, reading only the files. If another directory is found, it'll be recursed.
@@ -232,11 +232,11 @@ impl App {
 
                     // Trim %u/%U/%someLetter (which is used as arguments when launching XDG apps,
                     // not used by Gyr)
-                    let re = Regex::new(r" ?%[cDdFfikmNnUuv]").unwrap();
+                    let matcher: Matcher1<_> = regex!(br".*( ?%[cDdFfikmNnUuv]).*");
                     let mut trimmed = line.to_string();
 
-                    if let Some(range) = re.find(&line) {
-                        trimmed.replace_range(range.start()..range.end(), "");
+                    if let Some(range) = matcher.match_ranges(line.as_bytes()) {
+                        trimmed.replace_range(range.0.start..range.0.end, "");
                     }
 
                     exec = Some(trimmed.to_string());

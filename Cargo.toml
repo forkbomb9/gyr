@@ -25,7 +25,7 @@ directories = "3.0"
 dirs = "3.0"
 fuzzy-matcher = "0.3"
 libc = "0.2"
-regex = "1"
+safe-regex = "0.2"
 serde = { version = "1", features = ["derive"] }
 shell-words = "1.0"
 sled = "0.34"
