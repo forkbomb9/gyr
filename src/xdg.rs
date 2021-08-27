@@ -151,7 +151,7 @@ impl Ord for App {
 // Custom PartialOrd, uses our custom Ord
 impl PartialOrd for App {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 
@@ -232,6 +232,7 @@ impl App {
 
                     // Trim %u/%U/%someLetter (which is used as arguments when launching XDG apps,
                     // not used by Gyr)
+                    #[allow(clippy::assign_op_pattern)]
                     let matcher: Matcher1<_> = regex!(br".*( ?%[cDdFfikmNnUuv]).*");
                     let mut trimmed = line.to_string();
 
