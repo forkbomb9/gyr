@@ -2,6 +2,8 @@ use std::convert::{AsRef, TryInto};
 use std::fmt;
 use std::fs::{self, DirEntry};
 use std::path;
+use std::sync::mpsc;
+use std::thread;
 
 use eyre::eyre;
 use safe_regex::{regex, Matcher1};
@@ -38,49 +40,14 @@ fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
     }
 }
 
-/// Find XDG applications in `dirs` (recursive).
-///
-/// Updates history using the database
-pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<Vec<App>> {
-    let mut apps = Vec::new();
+pub struct AppHistory {
+    db: sled::Db,
+}
 
-    for dir in dirs {
-        let dir = dir.into();
-
-        let mut files: Vec<path::PathBuf> = vec![];
-
-        visit_dirs(&dir, &mut |entry| {
-            files.push(entry.path());
-        });
-
-        for file in &files {
-            match fs::read_to_string(file) {
-                Ok(contents) => {
-                    if let Ok(app) = App::parse(&contents, None) {
-                        if let Some(actions) = &app.actions {
-                            for action in actions {
-                                let ac = Action::default().name(action).from(app.name.clone());
-                                if let Ok(a) = App::parse(&contents, Some(ac)) {
-                                    apps.push(a);
-                                }
-                            }
-                        }
-                        apps.push(app);
-                    }
-                }
-                Err(error) => {
-                    eprintln!(
-                        "[ERROR]: Failed to read contents from {}: {}",
-                        file.display(),
-                        error
-                    );
-                }
-            }
-        }
-    }
-
-    for app in apps.iter_mut() {
-        if let Some(packed) = db.get(app.name.as_bytes())? {
+impl AppHistory {
+    pub fn get(&self, app: App) -> App {
+        let mut app = app;
+        if let Some(packed) = self.db.get(app.name.as_bytes()).unwrap() {
             let unpacked = super::bytes::unpack(
                 packed
                     .as_ref()
@@ -89,11 +56,61 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> eyre::Result<
             );
             app.history = unpacked;
         }
+        app
     }
+}
 
-    apps.sort();
+/// Find XDG applications in `dirs` (recursive).
+///
+/// Spawns a new thread and sends apps via a mpsc [Receiver]
+///
+/// Updates history using the database
+///
+/// [Receiver]: std::sync::mpsc::Receiver
+pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> mpsc::Receiver<App> {
+    let (sender, receiver) = mpsc::channel();
 
-    Ok(apps)
+    let dirs: Vec<path::PathBuf> = dirs.into_iter().map(|d| d.into()).collect();
+    let db = AppHistory { db: db.clone() };
+
+    let _worker = thread::spawn(move || {
+        for dir in dirs {
+            let mut files: Vec<path::PathBuf> = vec![];
+
+            visit_dirs(&dir, &mut |entry| {
+                files.push(entry.path());
+            });
+
+            for file in &files {
+                match fs::read_to_string(file) {
+                    Ok(contents) => {
+                        if let Ok(app) = App::parse(&contents, None) {
+                            if let Some(actions) = &app.actions {
+                                for action in actions {
+                                    let ac = Action::default().name(action).from(app.name.clone());
+                                    if let Ok(a) = App::parse(&contents, Some(ac)) {
+                                        sender.send(db.get(a)).unwrap();
+                                    }
+                                }
+                            }
+
+                            sender.send(db.get(app)).unwrap();
+                        }
+                    }
+                    Err(error) => {
+                        eprintln!(
+                            "[ERROR]: Failed to read contents from {}: {}",
+                            file.display(),
+                            error
+                        );
+                    }
+                }
+            }
+        }
+        drop(sender);
+    });
+
+    receiver
 }
 
 /// An XDG Specification App

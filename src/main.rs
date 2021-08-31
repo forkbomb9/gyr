@@ -26,6 +26,7 @@ use std::io;
 use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
+use std::sync::mpsc;
 
 use directories::ProjectDirs;
 use eyre::eyre;
@@ -108,7 +109,7 @@ fn real_main() -> eyre::Result<()> {
     }
 
     // Read applications
-    let apps = xdg::read(dirs, &db)?;
+    let apps = xdg::read(dirs, &db);
 
     // Initialize the terminal
     let raw_handle = io::stdout()
@@ -129,7 +130,9 @@ fn real_main() -> eyre::Result<()> {
     let input = Input::new();
 
     // App UI
-    let mut ui = UI::new(apps);
+    //
+    // Get one app to initialize the UI
+    let mut ui = UI::new(vec![apps.recv()?]);
 
     // Set user-defined verbosity level
     if let Some(level) = cli.verbose {
@@ -142,7 +145,30 @@ fn real_main() -> eyre::Result<()> {
     // App list
     let mut app_state = ListState::default();
 
+    let mut app_loading_finished = false;
+
     loop {
+        if !app_loading_finished {
+            loop {
+                match apps.try_recv() {
+                    Ok(app) => {
+                        ui.shown.push(app);
+                    }
+                    Err(e) => {
+                        match e {
+                            mpsc::TryRecvError::Disconnected => {
+                                app_loading_finished = true;
+                            }
+                            mpsc::TryRecvError::Empty => (),
+                        }
+                        break;
+                    }
+                }
+                ui.filter();
+                ui.info(cli.highlight_color);
+            }
+        }
+
         // Draw UI
         terminal.draw(|f| {
             // Split the window in half.
