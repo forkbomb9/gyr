@@ -47,20 +47,20 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
         match arg {
             Short('s') | Long("nosway") => {
                 default.sway = false;
-            },
+            }
             Short('c') | Long("config") => {
                 config_file = Some(path::PathBuf::from(parser.value()?));
-            },
+            }
             Long("clear_history") => {
                 default.clear_history = true;
-            },
+            }
             Short('v') | Long("verbose") => {
                 if let Some(v) = default.verbose {
                     default.verbose = Some(v + 1);
                 } else {
                     default.verbose = Some(1);
                 }
-            },
+            }
             Short('h') | Long("help") => {
                 println!("Error message helper");
                 std::process::exit(0);
@@ -74,13 +74,11 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
     // Read config file: First command line, then config dir
     {
         if config_file.is_none() {
-            if let Some(proj_dirs) =
-                ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME"))
-                {
-                    let mut tmp = proj_dirs.config_dir().to_path_buf();
-                    tmp.push("config.toml");
-                    config_file = Some(tmp);
-                }
+            if let Some(proj_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
+                let mut tmp = proj_dirs.config_dir().to_path_buf();
+                tmp.push("config.toml");
+                config_file = Some(tmp);
+            }
         }
 
         if let Some(f) = config_file {
