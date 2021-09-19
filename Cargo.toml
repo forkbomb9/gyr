@@ -21,8 +21,8 @@ lto = true
 [dependencies]
 eyre = "0.6"
 lexopt = "0.1"
-directories = "3.0"
-dirs = "3.0"
+directories = "4.0"
+dirs = "4.0"
 fuzzy-matcher = "0.3"
 libc = "0.2"
 safe-regex = "0.2"
