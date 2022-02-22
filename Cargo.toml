@@ -1,7 +1,7 @@
 [package]
 name = "gyr"
 version = "0.1.0"
-authors = ["Namkhai B. <namkhai.n3@protonmail.com>"]
+authors = ["Namkhai B. <me@forkbomb9.ch>"]
 edition = "2018"
 
 description = "A blazing fast TUI launcher for *BSD and Linux"
