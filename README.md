@@ -1,11 +1,15 @@
-# Gyr
+<div align="center">
 
-[![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://gitlab.com/forkbomb9/gyr/-/blob/master/LICENSE)
-[![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
-[![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/gyr?style=flat-square)]()
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+  ![Logo](./assets/gyr.svg)
 
-Gyr launcher, a _blazing fast_ TUI launcher for *BSD and Linux
+  [![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://gitlab.com/forkbomb9/gyr/-/blob/master/LICENSE)
+  [![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
+  [![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/gyr?style=flat-square)]()
+  [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+
+  Gyr launcher, a _blazing fast_ TUI launcher for \*BSD and Linux
+
+</div>
 
 [![asciicast](https://asciinema.org/a/vorSSCeHy9KOxUp1fpZuvYiEC.svg)](https://asciinema.org/a/vorSSCeHy9KOxUp1fpZuvYiEC)
 
