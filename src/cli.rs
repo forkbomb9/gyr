@@ -2,6 +2,21 @@ use directories::ProjectDirs;
 use serde::Deserialize;
 use std::{env, fs, io, path, process};
 
+fn usage() -> ! {
+    println!(
+        "Usage: {} [options]
+
+  -s, --nosway           Disable Sway integration.
+  -c, --config <config>  Specify a config file.
+  --clear_history        Clear launch history.
+  -v, --verbose          Increase verbosity level (multiple).
+  -h, --help             Show this help message.
+",
+        &env::args().nth(0).unwrap_or_else(|| "gyr".to_string())
+    );
+    std::process::exit(0);
+}
+
 /// Command line interface.
 #[derive(Debug)]
 pub struct Opts {
@@ -62,8 +77,7 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
                 }
             }
             Short('h') | Long("help") => {
-                println!("Error message helper");
-                std::process::exit(0);
+                usage();
             }
             _ => return Err(arg.unexpected()),
         }
