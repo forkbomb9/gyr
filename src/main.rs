@@ -204,7 +204,7 @@ fn real_main() -> eyre::Result<()> {
 
             // Description of the current app.
             let description = Paragraph::new(ui.text.clone())
-                .block(create_block("Gyr launcher"))
+                .block(create_block("Gyr"))
                 .style(Style::default())
                 // Don't trim leading spaces when wrapping
                 .wrap(Wrap { trim: false })
