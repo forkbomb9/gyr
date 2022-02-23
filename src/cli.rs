@@ -88,7 +88,7 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
     // Read config file: First command line, then config dir
     {
         if config_file.is_none() {
-            if let Some(proj_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
+            if let Some(proj_dirs) = ProjectDirs::from("ch", "forkbomb9", env!("CARGO_PKG_NAME")) {
                 let mut tmp = proj_dirs.config_dir().to_path_buf();
                 tmp.push("config.toml");
                 config_file = Some(tmp);

@@ -56,7 +56,7 @@ fn real_main() -> eyre::Result<()> {
     let db: sled::Db;
 
     // Open sled database
-    if let Some(project_dirs) = ProjectDirs::from("io", "forkbomb9", env!("CARGO_PKG_NAME")) {
+    if let Some(project_dirs) = ProjectDirs::from("ch", "forkbomb9", env!("CARGO_PKG_NAME")) {
         let mut hist_db = project_dirs.data_local_dir().to_path_buf();
 
         if !hist_db.exists() {
