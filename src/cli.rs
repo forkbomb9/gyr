@@ -11,6 +11,7 @@ fn usage() -> ! {
   --clear_history        Clear launch history.
   -v, --verbose          Increase verbosity level (multiple).
   -h, --help             Show this help message.
+  -V, --version          Show the version number and quit.
 ",
         &env::args().nth(0).unwrap_or_else(|| "gyr".to_string())
     );
@@ -78,6 +79,10 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
             }
             Short('h') | Long("help") => {
                 usage();
+            }
+            Short('V') | Long("version") => {
+                println!("{}", env!("CARGO_PKG_VERSION"));
+                std::process::exit(0);
             }
             _ => return Err(arg.unexpected()),
         }
