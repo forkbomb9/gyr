@@ -26,10 +26,9 @@ pub struct UI<'a> {
 }
 
 impl<'a> UI<'a> {
-    // @TODO: Check that this link is correct
-    /// Creates a new UI from a `Vec` of [App]s
+    /// Creates a new UI from a `Vec` of [Apps]
     ///
-    /// [App]: super::xdg::App
+    /// [Apps]: super::xdg::App
     pub fn new(items: Vec<xdg::App>) -> UI<'a> {
         UI {
             shown: items,
@@ -48,7 +47,7 @@ impl<'a> UI<'a> {
         self.verbose = b;
     }
 
-    /// Update self.info to current selection
+    /// Update `self.info` to current selection
     ///
     /// Should be called every time `self.selected` changes
     pub fn info(&mut self, color: Color) {
@@ -96,7 +95,8 @@ impl<'a> UI<'a> {
 
     /// Updates shown and hidden apps
     ///
-    /// Matches using `fuzzy_matcher`, with pattern being `self.query`
+    /// Matches using [fuzzy_matcher], with pattern being `self.query`
+    ///
     /// Should be called every time user adds/removes characters from `self.query`
     pub fn filter(&mut self) {
         // Hide apps that do *not* match the current filter,
