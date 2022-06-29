@@ -10,7 +10,6 @@
 /// CLI parser
 mod cli;
 /// Terminal input helpers
-#[allow(dead_code)]
 mod input;
 /// Ui helpers
 mod ui;

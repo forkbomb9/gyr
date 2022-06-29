@@ -52,19 +52,19 @@ pub enum Event<I> {
 /// Small input handler. Uses Termion as the backend.
 pub struct Input {
     rx: mpsc::Receiver<Event<Key>>,
-    input_handle: thread::JoinHandle<()>,
-    tick_handle: thread::JoinHandle<()>,
+    _input_handle: thread::JoinHandle<()>,
+    _tick_handle: thread::JoinHandle<()>,
 }
 
 impl Input {
     pub fn new() -> Self {
-        Self::with_config(Config::default())
+        Config::default().init()
     }
 
     pub fn with_config(config: Config) -> Self {
         let (tx, rx) = mpsc::channel();
 
-        let input_handle = {
+        let _input_handle = {
             let tx = tx.clone();
 
             thread::spawn(move || {
@@ -80,7 +80,7 @@ impl Input {
             })
         };
 
-        let tick_handle = {
+        let _tick_handle = {
             thread::spawn(move || loop {
                 if tx.send(Event::Tick).is_err() {
                     break;
@@ -91,8 +91,8 @@ impl Input {
 
         Self {
             rx,
-            input_handle,
-            tick_handle,
+            _input_handle,
+            _tick_handle,
         }
     }
 
