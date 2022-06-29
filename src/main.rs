@@ -62,7 +62,7 @@ fn real_main() -> eyre::Result<()> {
         if !hist_db.exists() {
             // Create dir if it doesn't exist
             if let Err(error) = fs::create_dir_all(&hist_db) {
-                return Err(eyre::eyre!(
+                return Err(eyre!(
                     "Error creating data dir {}: {}",
                     hist_db.display(),
                     error,
@@ -85,7 +85,7 @@ fn real_main() -> eyre::Result<()> {
             return Ok(());
         }
     } else {
-        return Err(eyre::eyre!(
+        return Err(eyre!(
             "can't find data dir for {}, is your system broken?",
             env!("CARGO_PKG_NAME")
         ));
