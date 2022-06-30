@@ -95,4 +95,4 @@ Notable changes will be documented in the [CHANGELOG](./CHANGELOG.md) file
 
 ## License
 
-[BSD 2-Clause](./LICENSE) (c) 2020 Namkhai B.
+[BSD 2-Clause](./LICENSE) (c) 2020-2022 Namkhai B.
