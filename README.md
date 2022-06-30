@@ -79,8 +79,8 @@ for_window [title="^launcher$"] floating enable, resize set width 500 height 430
 
 ## TODO
 
-* ~~Most used entries first~~ Done! :tada:
-* Cached entries
+* [X] Most used entries first
+* [ ] Cached entries
 
 ## Contributing
 
