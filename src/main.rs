@@ -3,7 +3,7 @@
 
 //! # Gyr
 //!
-//! > a _blazing fast_ TUI launcher for *BSD and Linux
+//! > _Blazing fast_ TUI launcher for GNU/Linux and *BSD
 //!
 //! For more info, check the [README](https://sr.ht/~forkbomb9/gyr)
 

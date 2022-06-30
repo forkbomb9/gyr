@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Namkhai B. <me@forkbomb9.ch>"]
 edition = "2018"
 
-description = "A blazing fast TUI launcher for *BSD and Linux"
+description = "Blazing fast TUI launcher for GNU/Linux and *BSD"
 
 repository = "https://sr.ht/~forkbomb9/gyr/"
 readme = "README.md"

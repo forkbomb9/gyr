@@ -6,7 +6,7 @@
   [![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
   [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-  A _blazing fast_ TUI launcher for \*BSD and Linux
+  _Blazing fast_ TUI launcher for GNU/Linux and \*BSD
 
   [![asciicast](https://asciinema.org/a/n34HCGxXINEoryRkuM8XOIVbJ.svg)](https://asciinema.org/a/n34HCGxXINEoryRkuM8XOIVbJ)
 
