@@ -6,14 +6,10 @@ edition = "2018"
 
 description = "A blazing fast TUI launcher for *BSD and Linux"
 
-repository = "https://gitlab.com/forkbomb9/gyr"
+repository = "https://sr.ht/~forkbomb9/gyr/"
 readme = "README.md"
 keywords = []
 license = "BSD-2-Clause"
-
-[badges]
-# GitLab CI
-gitlab = { repository = "forkbomb9/gyr"}
 
 [profile.release]
 lto = true

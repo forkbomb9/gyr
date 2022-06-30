@@ -1,10 +1,9 @@
 <div align="center">
 
-  ![Logo](./assets/gyr.svg)
+  ![Logo](./assets/gyr.png)
 
-  [![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://gitlab.com/forkbomb9/gyr/-/blob/master/LICENSE)
+  [![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://git.sr.ht/~forkbomb9/gyr/blob/main/LICENSE)
   [![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
-  [![Build status](https://img.shields.io/gitlab/pipeline/forkbomb9/gyr?style=flat-square)]()
   [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
   A _blazing fast_ TUI launcher for \*BSD and Linux
@@ -29,19 +28,19 @@
 * Install [Rust](https://www.rust-lang.org/learn/get-started)
 * Build:
     ```sh
-    $ git clone https://gitlab.com/forkbomb9/gyr.git && cd gyr
+    $ git clone https://git.sr.ht/~forkbomb9/gyr && cd gyr
     $ cargo build --release
     ```
 
 * Copy `target/release/gyr` to somewhere in your `$PATH`
 
-#### Option 2: Pre-built binaries
+#### Option 2: Distro packages
 
-Can be found in the [releases](https://gitlab.com/forkbomb9/gyr/-/releases) page.
+Gyr is in the Arch Linux AUR (`gyr`, `gyr-git` and `gyr-bin`).
 
-They available for Linux, statically built against the musl libc for `x86_64` and `aarch64`.
+Other distros may come soon-ish
 
-For FreeBSD, I'm working on writting and publishing a port (It builds fine).
+Alternatively, pre-built binaries for Linux x86_64 and aarch64 are available in the [releases](https://git.sr.ht/~forkbomb9/gyr/refs/).
 
 ## Usage
 
@@ -87,7 +86,11 @@ for_window [title="^launcher$"] floating enable, resize set width 500 height 430
 
 Feature requests and bug reports are most welcome.
 
-I'll accept pull requests fixing bugs or adding requested features.
+I'll accept patchsets fixing bugs or adding requested features.
+
+NOTE: The preferred way to contribute is via SourceHut, tickets can be opened at https://todo.sr.ht/~forkbomb9/gyr
+
+The GitLab releases & issues are kept for convenience, but merge requests are closed.
 
 ## Changelog
 
