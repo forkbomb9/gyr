@@ -9,7 +9,7 @@
 
   A _blazing fast_ TUI launcher for \*BSD and Linux
 
-  [![asciicast](https://asciinema.org/a/FmVNnU237SCEn7aP9nMYqABxd.svg)](https://asciinema.org/a/FmVNnU237SCEn7aP9nMYqABxd)
+  [![asciicast](https://asciinema.org/a/n34HCGxXINEoryRkuM8XOIVbJ.svg)](https://asciinema.org/a/n34HCGxXINEoryRkuM8XOIVbJ)
 
 </div>
 
