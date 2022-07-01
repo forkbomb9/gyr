@@ -16,7 +16,7 @@
 
 - [Install](#install)
 - [Usage](#usage)
-- [TODO](#todos)
+- [TODO](#todo)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -28,10 +28,17 @@
 * Install [Rust](https://www.rust-lang.org/learn/get-started)
 * Build:
     ```sh
+    $ cargo install gyr
+    ```
+* Add `$HOME/.cargo/bin` to your `$PATH`
+
+Or build from Git:
+
+* Build:
+    ```sh
     $ git clone https://git.sr.ht/~forkbomb9/gyr && cd gyr
     $ cargo build --release
     ```
-
 * Copy `target/release/gyr` to somewhere in your `$PATH`
 
 #### Option 2: Distro packages
