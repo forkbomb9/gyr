@@ -1,6 +1,6 @@
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tui::style::{Color, Style};
-use tui::text::{Span, Spans, Text};
+use tui::text::{Span, Spans};
 
 use super::xdg;
 
@@ -16,8 +16,6 @@ pub struct UI<'a> {
     pub text: Vec<Spans<'a>>,
     /// User query (used for matching)
     pub query: String,
-    /// UI log (not used in Gyr)
-    pub log: Vec<Text<'a>>,
     /// Verbosity level
     pub verbose: u64,
     #[doc(hidden)]
@@ -36,7 +34,6 @@ impl<'a> UI<'a> {
             selected: Some(0),
             text: vec![],
             query: String::new(),
-            log: vec![],
             verbose: 0,
             matcher: SkimMatcherV2::default(),
         }
@@ -135,12 +132,9 @@ impl<'a> UI<'a> {
         if self.shown.is_empty() {
             // Can't select anything if there's no items
             self.selected = None;
-            self.log.push(Text::raw("NO ITEMS!"));
         } else {
             // The list changed, go to first item
             self.selected = Some(0);
         }
-
-        self.log.push(Text::raw("update_filter\n"));
     }
 }
