@@ -92,19 +92,29 @@ fn real_main() -> eyre::Result<()> {
 
     // Directories to look for applications
     let mut dirs: Vec<path::PathBuf> = vec![];
-    for data_dir in [
-        // Data directories
-        path::PathBuf::from("/usr/share"),
-        path::PathBuf::from("/usr/local/share"),
-        dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
-    ]
-    .iter_mut()
-    {
-        // Add `/applications`
-        data_dir.push("applications");
-        if data_dir.exists() {
-            dirs.push(data_dir.to_path_buf());
+    if let Ok(res) = env::var("XDG_DATA_DIRS") {
+        for data_dir in res.split(':') {
+            let mut dir = path::PathBuf::from(data_dir);
+            dir.push("applications");
+            if dir.exists() {
+                dirs.push(dir.to_path_buf());
+            }
         }
+    } else {
+        for data_dir in [
+            // Data directories
+            path::PathBuf::from("/usr/share"),
+            path::PathBuf::from("/usr/local/share"),
+            dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
+        ]
+            .iter_mut()
+            {
+                // Add `/applications`
+                data_dir.push("applications");
+                if data_dir.exists() {
+                    dirs.push(data_dir.to_path_buf());
+                }
+            }
     }
 
     // Read applications
