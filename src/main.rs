@@ -138,9 +138,6 @@ fn real_main() -> eyre::Result<()> {
         ui.verbosity(level)
     }
 
-    // Set highlight color
-    ui.info(cli.highlight_color);
-
     // App list
     let mut app_state = ListState::default();
 
@@ -151,20 +148,21 @@ fn real_main() -> eyre::Result<()> {
             loop {
                 match apps.try_recv() {
                     Ok(app) => {
-                        ui.shown.push(app);
+                        ui.hidden.push(app);
                     }
                     Err(e) => {
                         match e {
                             mpsc::TryRecvError::Disconnected => {
+                                // Done loading, add apps to the UI
                                 app_loading_finished = true;
+                                ui.filter();
+                                ui.info(cli.highlight_color);
                             }
                             mpsc::TryRecvError::Empty => (),
                         }
                         break;
                     }
                 }
-                ui.filter();
-                ui.info(cli.highlight_color);
             }
         }
 

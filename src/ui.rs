@@ -26,11 +26,12 @@ pub struct UI<'a> {
 impl<'a> UI<'a> {
     /// Creates a new UI from a `Vec` of [Apps]
     ///
+    /// The new items are hidden by default, filter with `self.filter()`
     /// [Apps]: super::xdg::App
     pub fn new(items: Vec<xdg::App>) -> UI<'a> {
         UI {
-            shown: items,
-            hidden: vec![],
+            shown: vec![],
+            hidden: items,
             selected: Some(0),
             text: vec![],
             query: String::new(),
