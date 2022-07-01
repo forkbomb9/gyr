@@ -271,7 +271,7 @@ fn real_main() -> eyre::Result<()> {
                     return Ok(());
                 }
                 // Run app on enter
-                Key::Char('\n') => {
+                Key::Char('\n') | Key::Ctrl('y') => {
                     break;
                 }
                 // Add character to query
@@ -294,7 +294,7 @@ fn real_main() -> eyre::Result<()> {
                 }
                 // Go down one item.
                 // If we're at the bottom, back to the top.
-                Key::Down => {
+                Key::Down | Key::Ctrl('n') => {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected >= ui.shown.len() - 1 {
                             Some(0)
@@ -305,7 +305,7 @@ fn real_main() -> eyre::Result<()> {
                 }
                 // Go up one item.
                 // If we're at the top, go to the end.
-                Key::Up => {
+                Key::Up | Key::Ctrl('p') => {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected > 0 {
                             Some(selected - 1)

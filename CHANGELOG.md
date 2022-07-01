@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* VIM keybindings (`Ctrl+N`/`Ctrl+P`/`Ctrl+Y`)
+
 ### Fixed
 
 * ui: remove unused log
