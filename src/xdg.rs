@@ -161,7 +161,7 @@ impl Ord for App {
             .cmp(&other.corrected_score())
             .reverse()
             // Then sort alphabetically
-            .then(self.name.cmp(&other.name))
+            .then(self.name.to_lowercase().cmp(&other.name.to_lowercase()))
     }
 }
 
