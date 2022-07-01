@@ -266,7 +266,7 @@ fn real_main() -> eyre::Result<()> {
         if let Event::Input(key) = input.next()? {
             match key {
                 // Exit on escape
-                Key::Esc => {
+                Key::Esc | Key::Ctrl('q') | Key::Ctrl('c') => {
                     terminal.clear().wrap_err("Failed to clear terminal")?;
                     return Ok(());
                 }
