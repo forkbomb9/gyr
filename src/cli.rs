@@ -33,6 +33,8 @@ pub struct Opts {
     pub cursor: String,
     /// Verbosity level
     pub verbose: Option<u64>,
+    /// Don't scroll past the last/first item
+    pub hard_stop: bool,
 }
 
 impl Default for Opts {
@@ -44,6 +46,7 @@ impl Default for Opts {
             sway: false,
             cursor: "█".to_string(),
             verbose: None,
+            hard_stop: false,
         }
     }
 }
@@ -136,6 +139,10 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
         default.cursor = c;
     }
 
+    if let Some(h) = file_conf.hard_stop {
+        default.hard_stop = h;
+    }
+
     Ok(default)
 }
 
@@ -150,6 +157,8 @@ pub struct FileConf {
     pub terminal_launcher: Option<String>,
     /// Cursor character for the search
     pub cursor: Option<String>,
+    /// Don't scroll past the last/first item
+    pub hard_stop: Option<bool>,
 }
 
 impl FileConf {

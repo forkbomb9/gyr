@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * VIM keybindings (`Ctrl+N`/`Ctrl+P`/`Ctrl+Y`)
+* config: Disabling infinite scrolling via `hard_stop`
 
 ### Fixed
 

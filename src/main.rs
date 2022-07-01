@@ -297,7 +297,11 @@ fn real_main() -> eyre::Result<()> {
                 Key::Down | Key::Ctrl('n') => {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected >= ui.shown.len() - 1 {
-                            Some(0)
+                            if !cli.hard_stop {
+                                Some(0)
+                            } else {
+                                Some(selected)
+                            }
                         } else {
                             Some(selected + 1)
                         };
@@ -310,7 +314,11 @@ fn real_main() -> eyre::Result<()> {
                         ui.selected = if selected > 0 {
                             Some(selected - 1)
                         } else {
-                            Some(ui.shown.len() - 1)
+                            if !cli.hard_stop {
+                                Some(ui.shown.len() - 1)
+                            } else {
+                                Some(selected)
+                            }
                         };
                     }
                 }
