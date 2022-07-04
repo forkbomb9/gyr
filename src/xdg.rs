@@ -88,7 +88,7 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> mpsc::Receive
                             if let Some(actions) = &app.actions {
                                 for action in actions {
                                     let ac = Action::default().name(action).from(app.name.clone());
-                                    if let Ok(a) = App::parse(&contents, Some(ac)) {
+                                    if let Ok(a) = App::parse(&contents, Some(&ac)) {
                                         sender.send(db.get(a)).unwrap();
                                     }
                                 }
@@ -199,7 +199,7 @@ impl<'a> From<&'a App> for ListItem<'a> {
 
 impl App {
     /// Parse an application, or, if `action.is_some()`, an app action
-    pub fn parse<T: AsRef<str>>(contents: T, action: Option<Action>) -> eyre::Result<App> {
+    pub fn parse<T: AsRef<str>>(contents: T, action: Option<&Action>) -> eyre::Result<App> {
         let contents: &str = contents.as_ref();
 
         let pattern = if let Some(a) = &action {

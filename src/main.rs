@@ -97,24 +97,22 @@ fn real_main() -> eyre::Result<()> {
             let mut dir = path::PathBuf::from(data_dir);
             dir.push("applications");
             if dir.exists() {
-                dirs.push(dir.to_path_buf());
+                dirs.push(dir.clone());
             }
         }
     } else {
-        for data_dir in [
+        for data_dir in &mut [
             // Data directories
             path::PathBuf::from("/usr/share"),
             path::PathBuf::from("/usr/local/share"),
             dirs::data_local_dir().ok_or_else(|| eyre!("failed to get local data dir"))?,
-        ]
-            .iter_mut()
-            {
-                // Add `/applications`
-                data_dir.push("applications");
-                if data_dir.exists() {
-                    dirs.push(data_dir.to_path_buf());
-                }
+        ] {
+            // Add `/applications`
+            data_dir.push("applications");
+            if data_dir.exists() {
+                dirs.push(data_dir.clone());
             }
+        }
     }
 
     // Read applications
@@ -145,7 +143,7 @@ fn real_main() -> eyre::Result<()> {
 
     // Set user-defined verbosity level
     if let Some(level) = cli.verbose {
-        ui.verbosity(level)
+        ui.verbosity(level);
     }
 
     // App list
@@ -247,7 +245,7 @@ fn real_main() -> eyre::Result<()> {
                 // With `10` and the first `>` colorized with the highlight color
                 Span::raw("("),
                 Span::styled(
-                    (ui.selected.map(|v| v + 1).unwrap_or(0)).to_string(),
+                    (ui.selected.map_or(0, |v| v + 1)).to_string(),
                     Style::default().fg(cli.highlight_color),
                 ),
                 Span::raw("/"),
@@ -269,14 +267,14 @@ fn real_main() -> eyre::Result<()> {
             // Render app list
             f.render_stateful_widget(list, bottom_half[0], &mut app_state);
             // Render query
-            f.render_widget(query, bottom_half[1])
+            f.render_widget(query, bottom_half[1]);
         })?;
 
         // Handle user input
         if let Event::Input(key) = input.next()? {
             match key {
                 // Exit on escape
-                Key::Esc | Key::Ctrl('q') | Key::Ctrl('c') => {
+                Key::Esc | Key::Ctrl('q' | 'c') => {
                     terminal.clear().wrap_err("Failed to clear terminal")?;
                     return Ok(());
                 }

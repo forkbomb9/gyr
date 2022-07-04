@@ -27,7 +27,7 @@ impl<'a> UI<'a> {
     /// Creates a new UI from a `Vec` of [Apps]
     ///
     /// The new items are hidden by default, filter with `self.filter()`
-    /// [Apps]: super::xdg::App
+    /// [Apps]: `super::xdg::App`
     pub fn new(items: Vec<xdg::App>) -> UI<'a> {
         UI {
             shown: vec![],
@@ -93,7 +93,7 @@ impl<'a> UI<'a> {
 
     /// Updates shown and hidden apps
     ///
-    /// Matches using [fuzzy_matcher], with pattern being `self.query`
+    /// Matches using [`fuzzy_matcher`], with pattern being `self.query`
     ///
     /// Should be called every time user adds/removes characters from `self.query`
     pub fn filter(&mut self) {
