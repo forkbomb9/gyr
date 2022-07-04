@@ -306,14 +306,12 @@ fn real_main() -> eyre::Result<()> {
                 // If we're at the bottom, back to the top.
                 Key::Down | Key::Ctrl('n') => {
                     if let Some(selected) = ui.selected {
-                        ui.selected = if selected >= ui.shown.len() - 1 {
-                            if !cli.hard_stop {
-                                Some(0)
-                            } else {
-                                Some(selected)
-                            }
-                        } else {
+                        ui.selected = if selected < ui.shown.len() - 1 {
                             Some(selected + 1)
+                        } else if !cli.hard_stop {
+                            Some(0)
+                        } else {
+                            Some(selected)
                         };
                     }
                 }
@@ -323,12 +321,10 @@ fn real_main() -> eyre::Result<()> {
                     if let Some(selected) = ui.selected {
                         ui.selected = if selected > 0 {
                             Some(selected - 1)
+                        } else if !cli.hard_stop {
+                            Some(ui.shown.len() - 1)
                         } else {
-                            if !cli.hard_stop {
-                                Some(ui.shown.len() - 1)
-                            } else {
-                                Some(selected)
-                            }
+                            Some(selected)
                         };
                     }
                 }
