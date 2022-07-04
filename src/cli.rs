@@ -13,7 +13,7 @@ fn usage() -> ! {
   -h, --help             Show this help message.
   -V, --version          Show the version number and quit.
 ",
-        &env::args().nth(0).unwrap_or_else(|| "gyr".to_string())
+        &env::args().next().unwrap_or_else(|| "gyr".to_string())
     );
     std::process::exit(0);
 }
