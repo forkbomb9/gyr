@@ -47,7 +47,7 @@ Gyr is in the Arch Linux AUR (`gyr`, `gyr-git` and `gyr-bin`).
 
 Other distros may come soon-ish
 
-Alternatively, pre-built binaries for Linux x86_64 and aarch64 are available in the [releases](https://git.sr.ht/~forkbomb9/gyr/refs/).
+Alternatively, pre-built binaries for Linux (x86_64 and aarch64) and FreeBSD 13.1 (x86_64) are available in the [releases](https://git.sr.ht/~forkbomb9/gyr/refs/).
 
 ## Usage
 
