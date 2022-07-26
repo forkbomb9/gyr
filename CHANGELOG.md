@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.1] - 2022-07-26
+
 ### Added
 
 * VIM keybindings (`Ctrl+N`/`Ctrl+P`/`Ctrl+Y`)
@@ -18,6 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Switched to case insensitive sorting
 * Read `$XDG_DATA_DIRS` instead of harcoded data paths
 
-## v0.1.0 - 2022-07-01
+## [v0.1.0] - 2022-07-01
 
 * Initial release

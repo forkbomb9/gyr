@@ -1,6 +1,6 @@
 [package]
 name = "gyr"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Namkhai B. <me@forkbomb9.ch>"]
 edition = "2018"
 
@@ -8,7 +8,7 @@ description = "Blazing fast TUI launcher for GNU/Linux and *BSD"
 
 repository = "https://sr.ht/~forkbomb9/gyr/"
 readme = "README.md"
-keywords = []
+keywords = ["tui", "tools"]
 license = "BSD-2-Clause"
 
 [profile.release]
