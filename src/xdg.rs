@@ -1,6 +1,6 @@
 use std::convert::{AsRef, TryInto};
 use std::fmt;
-use std::fs::{self, DirEntry};
+use std::fs;
 use std::path;
 use std::sync::mpsc;
 use std::thread;
@@ -8,37 +8,7 @@ use std::thread;
 use eyre::eyre;
 use safe_regex::{regex, Matcher1};
 use tui::widgets::ListItem;
-
-/// Visit a directory, reading only the files. If another directory is found, it'll be recursed.
-///
-/// This function doesn't return anything, but prints errors when reading files and directories to
-/// stderr
-fn visit_dirs(dir: &path::Path, cb: &mut dyn FnMut(&DirEntry)) {
-    if dir.is_dir() {
-        match fs::read_dir(dir) {
-            Ok(ok_dir) => {
-                for entry in ok_dir {
-                    match entry {
-                        Ok(entry) => {
-                            let path = entry.path();
-                            if path.is_dir() {
-                                visit_dirs(&path, cb);
-                            } else {
-                                cb(&entry);
-                            }
-                        }
-                        Err(error) => {
-                            eprintln!("Failed to open file {}", error);
-                        }
-                    }
-                }
-            }
-            Err(error) => {
-                eprintln!("Failed to open directory {}: {}", dir.display(), error);
-            }
-        }
-    }
-}
+use walkdir::WalkDir;
 
 pub struct AppHistory {
     db: sled::Db,
@@ -77,32 +47,30 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> mpsc::Receive
         for dir in dirs {
             let mut files: Vec<path::PathBuf> = vec![];
 
-            visit_dirs(&dir, &mut |entry| {
-                files.push(entry.path());
-            });
+            for entry in WalkDir::new(&dir).min_depth(1).into_iter().filter(|entry| {
+                if let Ok(path) = entry {
+                    if !path.file_type().is_dir() {
+                        return true
+                    }
+                }
+                false
+            }).map(Result::unwrap) {
+                files.push(entry.path().to_owned());
+            }
 
             for file in &files {
-                match fs::read_to_string(file) {
-                    Ok(contents) => {
-                        if let Ok(app) = App::parse(&contents, None) {
-                            if let Some(actions) = &app.actions {
-                                for action in actions {
-                                    let ac = Action::default().name(action).from(app.name.clone());
-                                    if let Ok(a) = App::parse(&contents, Some(&ac)) {
-                                        sender.send(db.get(a)).unwrap();
-                                    }
+                if let Ok(contents) = fs::read_to_string(file) {
+                    if let Ok(app) = App::parse(&contents, None) {
+                        if let Some(actions) = &app.actions {
+                            for action in actions {
+                                let ac = Action::default().name(action).from(app.name.clone());
+                                if let Ok(a) = App::parse(&contents, Some(&ac)) {
+                                    sender.send(db.get(a)).unwrap();
                                 }
                             }
-
-                            sender.send(db.get(app)).unwrap();
                         }
-                    }
-                    Err(error) => {
-                        eprintln!(
-                            "[ERROR]: Failed to read contents from {}: {}",
-                            file.display(),
-                            error
-                        );
+
+                        sender.send(db.get(app)).unwrap();
                     }
                 }
             }

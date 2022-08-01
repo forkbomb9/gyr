@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* Switched from dirty recursive directory walker to [walkdir](https://crates.io/crates/walkdir)
+
 ## [v0.1.1] - 2022-07-26
 
 ### Added
