@@ -47,14 +47,19 @@ pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> mpsc::Receive
         for dir in dirs {
             let mut files: Vec<path::PathBuf> = vec![];
 
-            for entry in WalkDir::new(&dir).min_depth(1).into_iter().filter(|entry| {
-                if let Ok(path) = entry {
-                    if !path.file_type().is_dir() {
-                        return true
+            for entry in WalkDir::new(&dir)
+                .min_depth(1)
+                .into_iter()
+                .filter(|entry| {
+                    if let Ok(path) = entry {
+                        if !path.file_type().is_dir() {
+                            return true;
+                        }
                     }
-                }
-                false
-            }).map(Result::unwrap) {
+                    false
+                })
+                .map(Result::unwrap)
+            {
                 files.push(entry.path().to_owned());
             }
 
