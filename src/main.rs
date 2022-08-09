@@ -21,7 +21,7 @@ use ui::UI;
 
 use std::env;
 use std::fs;
-use std::io;
+use std::io::{self, Write};
 use std::os::unix::process::CommandExt;
 use std::path;
 use std::process;
@@ -53,6 +53,7 @@ fn main() {
 fn real_main() -> eyre::Result<()> {
     let cli = cli::parse()?;
     let db: sled::Db;
+    let lock_path: path::PathBuf;
 
     // Open sled database
     if let Some(project_dirs) = ProjectDirs::from("ch", "forkbomb9", env!("CARGO_PKG_NAME")) {
@@ -69,6 +70,47 @@ fn real_main() -> eyre::Result<()> {
             }
         }
 
+        // Check if Gyr is already running
+        {
+            let mut lock = hist_db.clone();
+            lock.push("lock");
+            lock_path = lock;
+            let contents = match fs::read_to_string(&lock_path) {
+                Err(e) if e.kind() == io::ErrorKind::NotFound => String::new(),
+                Ok(c) => c,
+                Err(e) => {
+                    return Err(e).wrap_err_with(|| format!("Failed to read lockfile"));
+                }
+            };
+
+            if !contents.is_empty() {
+                if cli.replace {
+                    let pid: i32 = contents
+                        .parse()
+                        .wrap_err("Failed to parse lockfile contents")?;
+                    #[allow(unsafe_code)]
+                    unsafe {
+                        libc::kill(pid, libc::SIGTERM);
+                    }
+                    fs::remove_file(&lock_path)?;
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                } else {
+                    // gyr is already running
+                    Err(eyre!("Gyr is already running"))?
+                }
+            }
+
+            // Write current pid to lock file
+            let mut lock_file = fs::File::create(&lock_path)?;
+            let pid;
+            // Safety: call to getpid is safe
+            #[allow(unsafe_code)]
+            unsafe {
+                pid = libc::getpid();
+            }
+            lock_file.write_all(pid.to_string().as_bytes())?;
+        }
+
         hist_db.push("hist_db");
 
         db = sled::open(hist_db).wrap_err("Failed to open database")?;
@@ -81,6 +123,7 @@ fn real_main() -> eyre::Result<()> {
                 remove {}.",
                 project_dirs.data_local_dir().display()
             );
+            fs::remove_file(lock_path).wrap_err("Failed to remove lock file")?;
             return Ok(());
         }
     } else {
@@ -276,7 +319,8 @@ fn real_main() -> eyre::Result<()> {
                 // Exit on escape
                 Key::Esc | Key::Ctrl('q' | 'c') => {
                     terminal.clear().wrap_err("Failed to clear terminal")?;
-                    return Ok(());
+                    ui.selected = None;
+                    break;
                 }
                 // Run app on enter
                 Key::Char('\n') | Key::Ctrl('y') => {
@@ -402,6 +446,8 @@ fn real_main() -> eyre::Result<()> {
             db.insert(&app_to_run.name.as_bytes(), &packed).unwrap();
         }
     }
+
+    fs::remove_file(lock_path).wrap_err("Failed to remove lock file")?;
 
     Ok(())
 }

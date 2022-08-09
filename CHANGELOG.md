@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* `-r`, `--replace` option to replace an existing Gyr instance.
+
 ### Changed
 
 * Switched from dirty recursive directory walker to [walkdir](https://crates.io/crates/walkdir)

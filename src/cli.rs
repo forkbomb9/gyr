@@ -8,6 +8,7 @@ fn usage() -> ! {
 
   -s, --nosway           Disable Sway integration.
   -c, --config <config>  Specify a config file.
+  -r, --replace          Replace existing gyr instances
   --clear_history        Clear launch history.
   -v, --verbose          Increase verbosity level (multiple).
   -h, --help             Show this help message.
@@ -27,6 +28,8 @@ pub struct Opts {
     pub clear_history: bool,
     /// Command to run Terminal=true apps
     pub terminal_launcher: String,
+    /// Replace already running instance of Gyr
+    pub replace: bool,
     /// Enable Sway integration (default when `$SWAYSOCK` is not empty)
     pub sway: bool,
     /// Cursor character for the search
@@ -43,6 +46,7 @@ impl Default for Opts {
             highlight_color: tui::style::Color::LightBlue,
             clear_history: false,
             terminal_launcher: "alacritty -e".to_string(),
+            replace: false,
             sway: false,
             cursor: "█".to_string(),
             verbose: None,
@@ -66,6 +70,9 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
         match arg {
             Short('s') | Long("nosway") => {
                 default.sway = false;
+            }
+            Short('r') | Long("replace") => {
+                default.replace = true;
             }
             Short('c') | Long("config") => {
                 config_file = Some(path::PathBuf::from(parser.value()?));
