@@ -54,6 +54,8 @@ Alternatively, pre-built binaries for Linux (x86_64 and aarch64) and FreeBSD 13.
 Run `gyr` from a terminal. Scroll through the app list, find some app typing chars, run selected pressing ENTER. Pretty straightforward.
 Oh, yes: go to the bottom with the left arrow, top with right. Cancel pressing Esc.
 
+Alternative bindings are Ctrl-Q to cancel, Ctrl-Y to run the app, Ctrl-N scroll down and Ctrl-P to scroll up (VIM bindings).
+
 I designed it for tiling WMs like [Sway](https://swaywm.org/) or [i3](https://i3wm.org/).
 
 > Note for Sway: When `$SWAYSOCK` is set, `swaymsg exec` is used to run the program.
