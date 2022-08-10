@@ -28,5 +28,5 @@ shell-words = "1.0"
 sled = "0.34"
 termion = "1.5"
 toml = "0.5"
-tui = { version = "0.18", default-features = false, features = ["termion"] }
+tui = { version = "0.19", default-features = false, features = ["termion"] }
 walkdir = "2.3"
