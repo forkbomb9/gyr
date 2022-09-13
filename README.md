@@ -2,9 +2,10 @@
 
   ![Logo](./assets/gyr.png)
 
-  [![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://git.sr.ht/~forkbomb9/gyr/blob/main/LICENSE)
+  [![License](https://img.shields.io/crates/l/gyr?style=flat-square)](https://git.sr.ht/~f9/gyr/blob/main/LICENSE)
   [![Latest version](https://img.shields.io/crates/v/gyr?style=flat-square)](https://crates.io/crates/gyr)
   [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+  ![written in Rust](https://img.shields.io/badge/language-rust-red.svg?style=flat-square)
 
   _Blazing fast_ TUI launcher for GNU/Linux and \*BSD
 
@@ -36,7 +37,7 @@ Or build from Git:
 
 * Build:
     ```sh
-    $ git clone https://git.sr.ht/~forkbomb9/gyr && cd gyr
+    $ git clone https://git.sr.ht/~f9/gyr && cd gyr
     $ cargo build --release
     ```
 * Copy `target/release/gyr` to somewhere in your `$PATH`
@@ -47,7 +48,7 @@ Gyr is in the Arch Linux AUR (`gyr`, `gyr-git` and `gyr-bin`).
 
 Other distros may come soon-ish
 
-Alternatively, pre-built binaries for Linux (x86_64 and aarch64) and FreeBSD 13.1 (x86_64) are available in the [releases](https://git.sr.ht/~forkbomb9/gyr/refs/).
+Alternatively, pre-built binaries for Linux (x86_64 and aarch64) and FreeBSD 13.1 (x86_64) are available in the [releases](https://git.sr.ht/~f9/gyr/refs/).
 
 ## Usage
 
@@ -97,7 +98,7 @@ Feature requests and bug reports are most welcome.
 
 I'll accept patchsets fixing bugs or adding requested features.
 
-NOTE: The preferred way to contribute is via SourceHut, tickets can be opened at https://todo.sr.ht/~forkbomb9/gyr
+NOTE: The preferred way to contribute is via SourceHut, tickets can be opened at https://todo.sr.ht/~f9/gyr
 
 The GitLab releases & issues are kept for convenience, but merge requests are closed.
 

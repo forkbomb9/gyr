@@ -6,7 +6,7 @@ edition = "2018"
 
 description = "Blazing fast TUI launcher for GNU/Linux and *BSD"
 
-repository = "https://sr.ht/~forkbomb9/gyr/"
+repository = "https://sr.ht/~f9/gyr/"
 readme = "README.md"
 keywords = ["tui", "tools"]
 license = "BSD-2-Clause"

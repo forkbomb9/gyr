@@ -5,7 +5,7 @@
 //!
 //! > _Blazing fast_ TUI launcher for GNU/Linux and *BSD
 //!
-//! For more info, check the [README](https://sr.ht/~forkbomb9/gyr)
+//! For more info, check the [README](https://sr.ht/~f9/gyr)
 
 /// CLI parser
 mod cli;
