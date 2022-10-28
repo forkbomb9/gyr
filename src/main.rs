@@ -79,7 +79,7 @@ fn real_main() -> eyre::Result<()> {
                 Err(e) if e.kind() == io::ErrorKind::NotFound => String::new(),
                 Ok(c) => c,
                 Err(e) => {
-                    return Err(e).wrap_err_with(|| format!("Failed to read lockfile"));
+                    return Err(e).wrap_err("Failed to read lockfile");
                 }
             };
 
