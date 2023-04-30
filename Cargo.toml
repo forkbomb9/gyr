@@ -19,9 +19,9 @@ strip = true
 
 [dependencies]
 eyre = "0.6"
-lexopt = "0.2"
-directories = "4.0"
-dirs = "4.0"
+lexopt = "0.3"
+directories = "5.0"
+dirs = "5.0"
 fuzzy-matcher = "0.3"
 libc = "0.2"
 safe-regex = "0.2"
@@ -29,6 +29,6 @@ serde = { version = "1.0", features = ["derive"] }
 shell-words = "1.0"
 sled = "0.34"
 termion = "2.0"
-toml = "0.5"
+toml = "0.7"
 tui = { version = "0.19", default-features = false, features = ["termion"] }
 walkdir = "2.3"

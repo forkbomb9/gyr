@@ -111,10 +111,20 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
         }
 
         if let Some(f) = config_file {
-            match FileConf::read(&f) {
-                Ok(conf) => {
-                    file_conf = Some(conf);
-                }
+            match fs::read_to_string(&f) {
+                Ok(content) => match FileConf::read(&content) {
+                    Ok(conf) => {
+                        file_conf = Some(conf);
+                    }
+                    Err(e) => {
+                        println!(
+                            "Error reading config file {}:\n\t{}",
+                            f.display(),
+                            e.message()
+                        );
+                        process::exit(1);
+                    }
+                },
                 Err(e) => {
                     if io::ErrorKind::NotFound != e.kind() {
                         println!("Error reading config file {}:\n\t{}", f.display(), e);
@@ -170,9 +180,8 @@ pub struct FileConf {
 
 impl FileConf {
     /// Parse a file.
-    pub fn read<P: AsRef<path::Path>>(input_file: P) -> Result<Self, io::Error> {
-        let config: Self = toml::from_str(&fs::read_to_string(&input_file)?)?;
-        Ok(config)
+    pub fn read(raw: &str) -> Result<Self, toml::de::Error> {
+        toml::from_str(raw)
     }
 }
 
