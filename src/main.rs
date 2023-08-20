@@ -42,7 +42,7 @@ use termion::raw::IntoRawMode;
 
 fn main() {
     if let Err(error) = real_main() {
-        eprintln!("{:?}\n", error);
+        eprintln!("{error:?}\n");
         eprintln!("Press enter...");
         let mut input = String::new();
         io::stdin().read_line(&mut input).ok();
@@ -96,7 +96,7 @@ fn real_main() -> eyre::Result<()> {
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 } else {
                     // gyr is already running
-                    Err(eyre!("Gyr is already running"))?
+                    return Err(eyre!("Gyr is already running"));
                 }
             }
 
@@ -392,7 +392,7 @@ fn real_main() -> eyre::Result<()> {
         // Switch to path specified by app to be run
         if let Some(path) = &app_to_run.path {
             env::set_current_dir(path::PathBuf::from(path)).wrap_err_with(|| {
-                format!("Failed to switch to {} when starting {}", path, app_to_run)
+                format!("Failed to switch to {path} when starting {app_to_run}")
             })?;
         }
 
@@ -434,16 +434,16 @@ fn real_main() -> eyre::Result<()> {
                 .stdout(process::Stdio::null())
                 .stderr(process::Stdio::null())
                 .spawn()
-                .wrap_err_with(|| format!("Failed to run {:?}", exec))?;
+                .wrap_err_with(|| format!("Failed to run {exec:?}"))?;
         } else {
             exec.spawn()
-                .wrap_err_with(|| format!("Failed to run {:?}", exec))?;
+                .wrap_err_with(|| format!("Failed to run {exec:?}"))?;
         }
 
         {
             let value = app_to_run.history + 1;
             let packed = bytes::pack(value);
-            db.insert(&app_to_run.name.as_bytes(), &packed).unwrap();
+            db.insert(app_to_run.name.as_bytes(), &packed).unwrap();
         }
     }
 

@@ -40,7 +40,7 @@ impl AppHistory {
 pub fn read(dirs: Vec<impl Into<path::PathBuf>>, db: &sled::Db) -> mpsc::Receiver<App> {
     let (sender, receiver) = mpsc::channel();
 
-    let dirs: Vec<path::PathBuf> = dirs.into_iter().map(|d| d.into()).collect();
+    let dirs: Vec<path::PathBuf> = dirs.into_iter().map(Into::into).collect();
     let db = AppHistory { db: db.clone() };
 
     let _worker = thread::spawn(move || {
@@ -243,7 +243,7 @@ impl App {
                     let line = line.trim_start_matches("Actions=");
                     let vector = line
                         .split(';')
-                        .map(|s| s.to_string())
+                        .map(ToString::to_string)
                         .collect::<Vec<String>>();
                     actions = Some(vector);
                 }

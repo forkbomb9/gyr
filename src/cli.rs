@@ -142,7 +142,7 @@ pub fn parse() -> Result<Opts, lexopt::Error> {
             Ok(color) => default.highlight_color = color,
             Err(e) => {
                 // @TODO: Better error messages
-                eprintln!("Error parsing config file: {}", e);
+                eprintln!("Error parsing config file: {e}");
                 std::process::exit(1);
             }
         }
