@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.4] - 2023-08-20
+
+### Changed
+
+* Migrated from [tui](https://github.com/fdehau/tui-rs) to [ratatui](https://github.com/ratatui-org/ratatui)
+* Pinned serde and serde_derive to v1.0.171, see https://github.com/serde-rs/serde/issues/2538
+
 ## [v0.1.3] - 2023-04-30
 
 ### Fixed
