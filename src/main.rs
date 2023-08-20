@@ -30,15 +30,15 @@ use std::sync::mpsc;
 use directories::ProjectDirs;
 use eyre::eyre;
 use eyre::WrapErr;
+use ratatui::backend::TermionBackend;
+use ratatui::layout::{Alignment, Constraint, Direction, Layout};
+use ratatui::style::{Modifier, Style};
+use ratatui::text::{Line, Span};
+use ratatui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap};
+use ratatui::Terminal;
 use termion::event::Key;
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
-use tui::backend::TermionBackend;
-use tui::layout::{Alignment, Constraint, Direction, Layout};
-use tui::style::{Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap};
-use tui::Terminal;
 
 fn main() {
     if let Err(error) = real_main() {
@@ -282,7 +282,7 @@ fn real_main() -> eyre::Result<()> {
             app_state.select(ui.selected);
 
             // Query
-            let query = Paragraph::new(Spans::from(vec![
+            let query = Paragraph::new(Line::from(vec![
                 // The resulting style will be:
                 // (10/51) >> filter
                 // With `10` and the first `>` colorized with the highlight color
@@ -303,7 +303,7 @@ fn real_main() -> eyre::Result<()> {
             .block(create_block(""))
             .style(Style::default())
             .alignment(Alignment::Left)
-            .wrap(tui::widgets::Wrap { trim: false });
+            .wrap(ratatui::widgets::Wrap { trim: false });
 
             // Render description
             f.render_widget(description, window[0]);

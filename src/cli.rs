@@ -23,7 +23,7 @@ fn usage() -> ! {
 #[derive(Debug)]
 pub struct Opts {
     /// Highlight color used in the UI
-    pub highlight_color: tui::style::Color,
+    pub highlight_color: ratatui::style::Color,
     /// Clear the history database
     pub clear_history: bool,
     /// Command to run Terminal=true apps
@@ -43,7 +43,7 @@ pub struct Opts {
 impl Default for Opts {
     fn default() -> Self {
         Self {
-            highlight_color: tui::style::Color::LightBlue,
+            highlight_color: ratatui::style::Color::LightBlue,
             clear_history: false,
             terminal_launcher: "alacritty -e".to_string(),
             replace: false,
@@ -185,30 +185,30 @@ impl FileConf {
     }
 }
 
-/// Parses a [String] into a tui [color]
+/// Parses a [String] into a ratatui [color]
 ///
 /// Case-insensitive
 ///
 /// [String]: std::string::String
 /// [color]: tui::style::Color
-fn string_to_color<T: Into<String>>(val: T) -> Result<tui::style::Color, &'static str> {
+fn string_to_color<T: Into<String>>(val: T) -> Result<ratatui::style::Color, &'static str> {
     match val.into().to_lowercase().as_ref() {
-        "black" => Ok(tui::style::Color::Black),
-        "red" => Ok(tui::style::Color::Red),
-        "green" => Ok(tui::style::Color::Green),
-        "yellow" => Ok(tui::style::Color::Yellow),
-        "blue" => Ok(tui::style::Color::Blue),
-        "magenta" => Ok(tui::style::Color::Magenta),
-        "cyan" => Ok(tui::style::Color::Cyan),
-        "gray" => Ok(tui::style::Color::Gray),
-        "darkgray" => Ok(tui::style::Color::DarkGray),
-        "lightred" => Ok(tui::style::Color::LightRed),
-        "lightgreen" => Ok(tui::style::Color::LightGreen),
-        "lightyellow" => Ok(tui::style::Color::LightYellow),
-        "lightblue" => Ok(tui::style::Color::LightBlue),
-        "lightmagenta" => Ok(tui::style::Color::LightMagenta),
-        "lightcyan" => Ok(tui::style::Color::LightCyan),
-        "white" => Ok(tui::style::Color::White),
+        "black" => Ok(ratatui::style::Color::Black),
+        "red" => Ok(ratatui::style::Color::Red),
+        "green" => Ok(ratatui::style::Color::Green),
+        "yellow" => Ok(ratatui::style::Color::Yellow),
+        "blue" => Ok(ratatui::style::Color::Blue),
+        "magenta" => Ok(ratatui::style::Color::Magenta),
+        "cyan" => Ok(ratatui::style::Color::Cyan),
+        "gray" => Ok(ratatui::style::Color::Gray),
+        "darkgray" => Ok(ratatui::style::Color::DarkGray),
+        "lightred" => Ok(ratatui::style::Color::LightRed),
+        "lightgreen" => Ok(ratatui::style::Color::LightGreen),
+        "lightyellow" => Ok(ratatui::style::Color::LightYellow),
+        "lightblue" => Ok(ratatui::style::Color::LightBlue),
+        "lightmagenta" => Ok(ratatui::style::Color::LightMagenta),
+        "lightcyan" => Ok(ratatui::style::Color::LightCyan),
+        "white" => Ok(ratatui::style::Color::White),
         _ => Err("unknow color"),
     }
 }

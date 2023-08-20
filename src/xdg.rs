@@ -6,8 +6,8 @@ use std::sync::mpsc;
 use std::thread;
 
 use eyre::eyre;
+use ratatui::widgets::ListItem;
 use safe_regex::{regex, Matcher1};
-use tui::widgets::ListItem;
 use walkdir::WalkDir;
 
 pub struct AppHistory {

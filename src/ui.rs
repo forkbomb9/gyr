@@ -1,6 +1,6 @@
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use tui::style::{Color, Style};
-use tui::text::{Span, Spans};
+use ratatui::style::{Color, Style};
+use ratatui::text::{Line, Span};
 
 use super::xdg;
 
@@ -13,7 +13,7 @@ pub struct UI<'a> {
     /// Current selection (index of `self.shown`)
     pub selected: Option<usize>,
     /// Info text
-    pub text: Vec<Spans<'a>>,
+    pub text: Vec<Line<'a>>,
     /// User query (used for matching)
     pub query: String,
     /// Verbosity level
@@ -52,14 +52,14 @@ impl<'a> UI<'a> {
         if let Some(selected) = self.selected {
             // If there's some selection, update info
             self.text = vec![
-                Spans::from(Span::styled(
+                Line::from(Span::styled(
                     self.shown[selected].name.clone(),
                     Style::default().fg(color),
                 )),
-                Spans::from(Span::raw(self.shown[selected].description.clone())),
+                Line::from(Span::raw(self.shown[selected].description.clone())),
             ];
             if self.verbose > 1 {
-                self.text.push(Spans::default());
+                self.text.push(Line::default());
 
                 let mut text = if self.shown[selected].is_terminal {
                     vec![Span::raw("Exec (terminal): ")]
@@ -72,14 +72,14 @@ impl<'a> UI<'a> {
                     Style::default(),
                 ));
 
-                self.text.push(Spans::from(text));
+                self.text.push(Line::from(text));
 
                 if self.verbose > 2 {
-                    self.text.push(Spans::from(Span::raw(format!(
+                    self.text.push(Line::from(Span::raw(format!(
                         "Times run: {}",
                         &self.shown[selected].history
                     ))));
-                    self.text.push(Spans::from(Span::raw(format!(
+                    self.text.push(Line::from(Span::raw(format!(
                         "\nMatching score: {}",
                         self.shown[selected].score
                     ))));
