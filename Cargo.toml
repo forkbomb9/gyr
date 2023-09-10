@@ -1,13 +1,13 @@
 [package]
 name = "gyr"
 version = "0.1.4"
-authors = ["Namkhai B. <me@forkbomb9.ch>"]
+authors = ["Namkhai B. <nk@nkeor.me>"]
 edition = "2021"
 
 description = "Blazing fast TUI launcher for GNU/Linux and *BSD"
 
-homepage = "https://sr.ht/~f9/gyr/"
-repository = "https://git.sr.ht/~f9/gyr/"
+homepage = "https://sr.ht/~nkeor/gyr/"
+repository = "https://git.sr.ht/~nkeor/gyr/"
 readme = "README.md"
 keywords = ["tui", "tools"]
 categories = ["os"]
